@@ -12,6 +12,12 @@ dependencies:
   flutter_sound: ^9.1.2
   google_fonts: ^2.2.0
   cupertino_icons: ^1.0.2
+  just_audio: ^0.9.18
+  just_waveform: ^0.0.2
+  audio_session: ^0.1.6+1
+  audio_service: ^0.18.3
+  just_audio_background: ^0.0.1-beta.3
+  avatar_glow: ^2.0.2
 
 dev_dependencies:
   flutter_test:
@@ -20,3 +26,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/audios/
