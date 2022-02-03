@@ -169,6 +169,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   Padding(
                     padding: const EdgeInsets.only(bottom: 20.0),
                     child: TextField(
+                      onTap: () => Navigator.pushNamed(context, "/search"),
+                      readOnly: true,
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.white,
