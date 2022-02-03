@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:voice_recorder_app/pages/home_page.dart';
+import 'package:voice_recorder_app/pages/search_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,6 +17,9 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: const HomePage(),
+      routes: {
+        "/search": (context) => const SearchPage(),
+      },
     );
   }
 }
