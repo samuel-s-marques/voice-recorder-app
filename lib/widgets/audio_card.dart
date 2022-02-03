@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:voice_recorder_app/util/util.dart';
 
 class AudioCard extends StatefulWidget {
   const AudioCard({Key? key}) : super(key: key);
@@ -12,6 +13,9 @@ class _AudioCardState extends State<AudioCard> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      onTap: () {
+        showAudioBottomSheet(context);
+      },
       dense: true,
       tileColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
