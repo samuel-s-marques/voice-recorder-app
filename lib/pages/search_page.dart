@@ -9,6 +9,8 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
+  bool _hasText = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,11 +41,33 @@ class _SearchPageState extends State<SearchPage> {
                           borderRadius: BorderRadius.circular(10),
                           borderSide: const BorderSide(style: BorderStyle.none, width: 0.0),
                         ),
-                        suffixIcon: const Icon(
-                          Icons.search,
-                          color: Color(0xFF777777),
-                        ),
+                        suffixIcon: _hasText
+                            ? IconButton(
+                                onPressed: () {},
+                                icon: const Icon(
+                                  Icons.close,
+                                  color: Color(0xFF777777),
+                                ),
+                              )
+                            : IconButton(
+                                onPressed: () {},
+                                icon: const Icon(
+                                  Icons.mic,
+                                  color: Color(0xFF777777),
+                                ),
+                              ),
                       ),
+                      onChanged: (value) {
+                        if (value.isNotEmpty) {
+                          setState(() {
+                            _hasText = true;
+                          });
+                        } else {
+                          setState(() {
+                            _hasText = false;
+                          });
+                        }
+                      },
                       autofocus: true,
                     ),
                     SizedBox(
@@ -164,6 +188,17 @@ class _SearchPageState extends State<SearchPage> {
                   ],
                 ),
               ),
+              Center(
+                child: Text(
+                  "Nada encontrado",
+                  style: GoogleFonts.getFont(
+                    "Inter",
+                    fontSize: 20,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF969AA0),
+                  ),
+                ),
+              )
             ],
           ),
         ),
