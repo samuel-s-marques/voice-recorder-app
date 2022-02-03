@@ -59,23 +59,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           )
         ],
         bottom: TabBar(
-          indicator: const UnderlineTabIndicator(
-            borderSide: BorderSide(width: 4.0, color: Color(0xFF495BFF)),
-          ),
-          labelColor: const Color(0xFF495BFF),
-          labelStyle: GoogleFonts.getFont(
-            "Inter",
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: const Color(0xFF23262F),
-          ),
-          unselectedLabelColor: const Color(0xFF23262F),
-          tabs: const [
-            Tab(
-              text: "Gravar",
-            ),
-            Tab(text: "Lista")
-          ],
+          tabs: const [Tab(text: "Gravar"), Tab(text: "Lista")],
           controller: _tabController,
         ),
       ),
@@ -89,21 +73,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               ),
               Text(
                 "00:00:00",
-                style: GoogleFonts.getFont(
-                  "Inter",
-                  fontWeight: FontWeight.bold,
-                  fontSize: 38,
-                  color: const Color(0xFF23262F),
-                ),
+                style: Theme.of(context).textTheme.headline1!.copyWith(fontSize: 38),
               ),
               Text(
                 "Alta qualidade",
-                style: GoogleFonts.getFont(
-                  "Inter",
-                  fontWeight: FontWeight.w300,
-                  fontSize: 24,
-                  color: const Color(0xFF777777),
-                ),
+                style: Theme.of(context).textTheme.subtitle1,
               ),
               const Spacer(),
               Padding(
@@ -171,16 +145,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     child: TextField(
                       onTap: () => Navigator.pushNamed(context, "/search"),
                       readOnly: true,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
+                      decoration: const InputDecoration(
                         hintText: "Procurar",
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(style: BorderStyle.none, width: 0.0),
-                        ),
-                        suffixIcon: const Icon(
+                        suffixIcon: Icon(
                           Icons.search,
                           color: Color(0xFF777777),
                         ),
@@ -213,8 +180,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   ),
                   ListView.separated(
                     shrinkWrap: true,
-                    physics: BouncingScrollPhysics(),
-                    separatorBuilder: (context, index) => SizedBox(height: 5),
+                    physics: const BouncingScrollPhysics(),
+                    separatorBuilder: (context, index) => const SizedBox(height: 5),
                     itemCount: 7,
                     itemBuilder: (BuildContext context, int index) => AudioCard(),
                   )
