@@ -18,6 +18,7 @@ dependencies:
   audio_service: ^0.18.3
   just_audio_background: ^0.0.1-beta.3
   avatar_glow: ^2.0.2
+  sliding_sheet: ^0.5.2
 
 dev_dependencies:
   flutter_test:
