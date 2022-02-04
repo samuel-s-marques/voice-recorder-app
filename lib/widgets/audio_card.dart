@@ -24,21 +24,11 @@ class _AudioCardState extends State<AudioCard> {
         children: [
           Text(
             "Gravação 1",
-            style: GoogleFonts.getFont(
-              "Inter",
-              fontSize: 17,
-              color: const Color(0xFF23262F),
-              fontWeight: FontWeight.w500,
-            ),
+            style: Theme.of(context).textTheme.headline2,
           ),
           Text(
             "09:09",
-            style: GoogleFonts.getFont(
-              "Inter",
-              fontSize: 13,
-              color: const Color(0xFF777777),
-              fontWeight: FontWeight.w500,
-            ),
+            style: Theme.of(context).textTheme.subtitle2,
           ),
         ],
       ),
@@ -47,21 +37,11 @@ class _AudioCardState extends State<AudioCard> {
         children: [
           Text(
             "00:18:06",
-            style: GoogleFonts.getFont(
-              "Inter",
-              fontSize: 13,
-              color: const Color(0xFF777777),
-              fontWeight: FontWeight.w500,
-            ),
+            style: Theme.of(context).textTheme.subtitle2,
           ),
           Text(
             "1,4 mb",
-            style: GoogleFonts.getFont(
-              "Inter",
-              fontSize: 13,
-              color: const Color(0xFF777777),
-              fontWeight: FontWeight.w500,
-            ),
+            style: Theme.of(context).textTheme.subtitle2,
           ),
         ],
       ),
@@ -71,7 +51,10 @@ class _AudioCardState extends State<AudioCard> {
         child: IconButton(
           padding: EdgeInsets.zero,
           onPressed: () {},
-          icon: const Icon(Icons.play_arrow, color: Color(0xFF323232),),
+          icon: const Icon(
+            Icons.play_arrow,
+            color: Color(0xFF323232),
+          ),
           iconSize: 30,
         ),
       ),
