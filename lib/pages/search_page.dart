@@ -15,11 +15,7 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F2),
-      appBar: AppBar(
-        iconTheme: const IconThemeData(color: Color(0xFF323232)),
-        backgroundColor: Colors.white,
-        elevation: 0.0,
-      ),
+      appBar: AppBar(),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: 20.0, bottom: 15.0),
@@ -83,100 +79,18 @@ class _SearchPageState extends State<SearchPage> {
                             children: [
                               Text(
                                 "Categorias",
-                                style: GoogleFonts.getFont(
-                                  "Inter",
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 16,
-                                  color: const Color(0xFF23262F),
-                                ),
+                                style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 16),
                               ),
                               Wrap(
                                 spacing: 10,
                                 runSpacing: -8,
                                 children: [
-                                  ActionChip(
-                                    label: Text(
-                                      "Finanças",
-                                      style: GoogleFonts.getFont(
-                                        "Inter",
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 14,
-                                        color: const Color(0xFF23262F),
-                                      ),
-                                    ),
+                                  ChoiceChip(
+                                    label: const Text("Finanças"),
+                                    labelStyle: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 14),
                                     backgroundColor: const Color(0xFFEFEFEF),
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                    onPressed: () {},
-                                  ),
-                                  ActionChip(
-                                    label: Text(
-                                      "Finanças",
-                                      style: GoogleFonts.getFont(
-                                        "Inter",
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 14,
-                                        color: const Color(0xFF23262F),
-                                      ),
-                                    ),
-                                    backgroundColor: const Color(0xFFEFEFEF),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                    onPressed: () {},
-                                  ),
-                                  ActionChip(
-                                    label: Text(
-                                      "Finanças",
-                                      style: GoogleFonts.getFont(
-                                        "Inter",
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 14,
-                                        color: const Color(0xFF23262F),
-                                      ),
-                                    ),
-                                    backgroundColor: const Color(0xFFEFEFEF),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                    onPressed: () {},
-                                  ),
-                                  ActionChip(
-                                    label: Text(
-                                      "Finanças",
-                                      style: GoogleFonts.getFont(
-                                        "Inter",
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 14,
-                                        color: const Color(0xFF23262F),
-                                      ),
-                                    ),
-                                    backgroundColor: const Color(0xFFEFEFEF),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                    onPressed: () {},
-                                  ),
-                                  ActionChip(
-                                    label: Text(
-                                      "Finanças",
-                                      style: GoogleFonts.getFont(
-                                        "Inter",
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 14,
-                                        color: const Color(0xFF23262F),
-                                      ),
-                                    ),
-                                    backgroundColor: const Color(0xFFEFEFEF),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                    onPressed: () {},
-                                  ),
-                                  ActionChip(
-                                    label: Text(
-                                      "Finanças",
-                                      style: GoogleFonts.getFont(
-                                        "Inter",
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 14,
-                                        color: const Color(0xFF23262F),
-                                      ),
-                                    ),
-                                    backgroundColor: const Color(0xFFEFEFEF),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                    onPressed: () {},
+                                    selected: false,
                                   ),
                                 ],
                               )
@@ -191,12 +105,7 @@ class _SearchPageState extends State<SearchPage> {
               Center(
                 child: Text(
                   "Nada encontrado",
-                  style: GoogleFonts.getFont(
-                    "Inter",
-                    fontSize: 20,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF969AA0),
-                  ),
+                  style: Theme.of(context).textTheme.bodyText1,
                 ),
               )
             ],

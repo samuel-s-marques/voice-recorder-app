@@ -37,24 +37,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       backgroundColor: const Color(0xFFF2F2F2),
       appBar: AppBar(
         toolbarHeight: 100,
-        elevation: 0,
-        backgroundColor: Colors.white,
-        title: Text(
-          "Gravador de Voz",
-          style: GoogleFonts.getFont(
-            "Inter",
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: const Color(0xFF23262F),
-          ),
-        ),
-        centerTitle: true,
+        title: const Text("Gravador de Voz",),
         actions: [
           IconButton(
             onPressed: () {},
             icon: const Icon(
               Icons.more_vert,
-              color: Color(0xFF323232),
             ),
           )
         ],
@@ -164,12 +152,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     onChanged: (_) {},
                     hint: Text(
                       "Categoria",
-                      style: GoogleFonts.getFont(
-                        "Inter",
-                        color: const Color(0xFF23262F),
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16,
-                      ),
+                      style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 16)
                     ),
                     icon: const Icon(
                       Icons.arrow_drop_down_outlined,
