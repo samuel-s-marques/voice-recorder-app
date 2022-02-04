@@ -21,6 +21,21 @@ class MyApp extends StatelessWidget {
         "/search": (context) => const SearchPage(),
       },
       theme: ThemeData(
+        appBarTheme: AppBarTheme(
+          iconTheme: const IconThemeData(color: Color(0xFF323232)),
+          backgroundColor: Colors.white,
+          elevation: 0.0,
+          actionsIconTheme: const IconThemeData(
+            color: Color(0xFF323232),
+          ),
+          centerTitle: true,
+          titleTextStyle: GoogleFonts.getFont(
+            "Inter",
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF23262F),
+          ),
+        ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: Colors.white,
@@ -79,6 +94,12 @@ class MyApp extends StatelessWidget {
             fontSize: 13,
             fontWeight: FontWeight.w500,
             color: const Color(0xFF777777),
+          ),
+          bodyText1: GoogleFonts.getFont(
+            "Inter",
+            fontSize: 20,
+            fontWeight: FontWeight.w500,
+            color: const Color(0xFF969AA0),
           ),
         ),
       ),
