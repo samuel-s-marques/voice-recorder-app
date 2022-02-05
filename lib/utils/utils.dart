@@ -43,3 +43,5 @@ extension FileExtention on FileSystemEntity{
     return path.split("/").last.split(".").first;
   }
 }
+
+durationFormat(Duration duration) => duration.toString().split('.').first.padLeft(8, "0");
