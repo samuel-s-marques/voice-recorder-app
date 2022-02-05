@@ -1,15 +1,12 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:sliding_sheet/sliding_sheet.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter_sound/flutter_sound.dart';
-import 'package:flutter_sound_platform_interface/flutter_sound_recorder_platform_interface.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:voice_recorder_app/utils/utils.dart';
@@ -101,7 +98,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     _mRecorder!.startRecorder(
       toFile: "${applicationDirectory.path}/AUDIO.mp4",
       codec: _codec,
-      audioSource: AudioSource.microphone,
     ).then((_) {
       _stopWatchTimer.onExecute.add(StopWatchExecute.start);
       setState(() {});
@@ -425,12 +421,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                             File audioFile = File(audiosFiles[index].path);
 
                             return FutureBuilder(
-                              future: MetadataRetriever.fromFile(audioFile),
-                              builder: (BuildContext context, AsyncSnapshot<Metadata> snapshot) {
+                              future: AudioPlayer().setUrl(audioFile.path),
+                              builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
                                 DateFormat dayFormat = DateFormat.yMd();
                                 DateFormat timeFormat = DateFormat.Hm();
-
-                                Metadata? metadata = snapshot.data;
                                 String fileSize = getFileSize(audioFile.lengthSync(), 1);
                                 DateTime createdAt = audioFile.lastModifiedSync();
                                 String createdAtFormatted = "";
@@ -464,7 +458,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        "00:18:06",
+                                        durationFormat(snapshot.data) ?? "00:00:00",
                                         style: Theme.of(context).textTheme.subtitle2,
                                       ),
                                       Text(
