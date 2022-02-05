@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_media_metadata/flutter_media_metadata.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sliding_sheet/sliding_sheet.dart';
 import 'package:audio_session/audio_session.dart';
@@ -9,6 +12,7 @@ import 'package:flutter_sound/flutter_sound.dart';
 import 'package:flutter_sound_platform_interface/flutter_sound_recorder_platform_interface.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
+import 'package:voice_recorder_app/utils/utils.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -65,18 +69,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     super.dispose();
   }
 
-  Future<Directory> getDirectory() async {
-    Directory? applicationDirectory = await getApplicationSupportDirectory();
-    Directory audiosFolder = Directory("${applicationDirectory.path}/audios/");
-
-    if (await audiosFolder.exists()) {
-      return audiosFolder;
-    } else {
-      await audiosFolder.create(recursive: true);
-      return audiosFolder;
-    }
-  }
-
   Future<void> openTheRecorder() async {
     var status = await Permission.microphone.request();
     if (status != PermissionStatus.granted) {
@@ -106,13 +98,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   void record() async {
     Directory? applicationDirectory = await getDirectory();
 
-    _mRecorder!
-        .startRecorder(
+    _mRecorder!.startRecorder(
       toFile: "${applicationDirectory.path}/AUDIO.mp4",
       codec: _codec,
       audioSource: AudioSource.microphone,
-    )
-        .then((_) {
+    ).then((_) {
       _stopWatchTimer.onExecute.add(StopWatchExecute.start);
       setState(() {});
     });
@@ -431,51 +421,75 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           physics: const BouncingScrollPhysics(),
                           separatorBuilder: (context, index) => const SizedBox(height: 5),
                           itemCount: audiosFiles.length,
-                          itemBuilder: (BuildContext context, int index) => ListTile(
-                            onTap: () => showAudioBottomSheet(),
-                            dense: true,
-                            tileColor: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            title: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "Gravação 1",
-                                  style: Theme.of(context).textTheme.headline2,
-                                ),
-                                Text(
-                                  "09:09",
-                                  style: Theme.of(context).textTheme.subtitle2,
-                                ),
-                              ],
-                            ),
-                            subtitle: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "00:18:06",
-                                  style: Theme.of(context).textTheme.subtitle2,
-                                ),
-                                Text(
-                                  "1,4 mb",
-                                  style: Theme.of(context).textTheme.subtitle2,
-                                ),
-                              ],
-                            ),
-                            leading: CircleAvatar(
-                              radius: 35,
-                              backgroundColor: const Color(0xFFEFEFEF),
-                              child: IconButton(
-                                padding: EdgeInsets.zero,
-                                onPressed: () {},
-                                icon: const Icon(
-                                  Icons.play_arrow,
-                                  color: Color(0xFF323232),
-                                ),
-                                iconSize: 30,
-                              ),
-                            ),
-                          ),
+                          itemBuilder: (BuildContext context, int index) {
+                            File audioFile = File(audiosFiles[index].path);
+
+                            return FutureBuilder(
+                              future: MetadataRetriever.fromFile(audioFile),
+                              builder: (BuildContext context, AsyncSnapshot<Metadata> snapshot) {
+                                DateFormat dayFormat = DateFormat.yMd();
+                                DateFormat timeFormat = DateFormat.Hm();
+
+                                Metadata? metadata = snapshot.data;
+                                String fileSize = getFileSize(audioFile.lengthSync(), 1);
+                                DateTime createdAt = audioFile.lastModifiedSync();
+                                String createdAtFormatted = "";
+                                String fileName = audioFile.name ?? "Gravação";
+
+                                if (createdAt.isToday()) {
+                                  createdAtFormatted = timeFormat.format(createdAt);
+                                } else {
+                                  createdAtFormatted = dayFormat.format(createdAt);
+                                }
+
+                                return ListTile(
+                                  onTap: () => showAudioBottomSheet(),
+                                  dense: true,
+                                  tileColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  title: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        fileName,
+                                        style: Theme.of(context).textTheme.headline2,
+                                      ),
+                                      Text(
+                                        createdAtFormatted,
+                                        style: Theme.of(context).textTheme.subtitle2,
+                                      ),
+                                    ],
+                                  ),
+                                  subtitle: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "00:18:06",
+                                        style: Theme.of(context).textTheme.subtitle2,
+                                      ),
+                                      Text(
+                                        fileSize,
+                                        style: Theme.of(context).textTheme.subtitle2,
+                                      ),
+                                    ],
+                                  ),
+                                  leading: CircleAvatar(
+                                    radius: 35,
+                                    backgroundColor: const Color(0xFFEFEFEF),
+                                    child: IconButton(
+                                      padding: EdgeInsets.zero,
+                                      onPressed: () {},
+                                      icon: const Icon(
+                                        Icons.play_arrow,
+                                        color: Color(0xFF323232),
+                                      ),
+                                      iconSize: 30,
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
                         );
                       }
 
