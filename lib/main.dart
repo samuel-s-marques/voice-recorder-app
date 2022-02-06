@@ -31,13 +31,26 @@ class MyApp extends StatelessWidget {
           "/search": (context) => const SearchPage(),
         },
         theme: ThemeData(
+          buttonTheme: const ButtonThemeData(
+            colorScheme: ColorScheme.light(
+              primary: Color(0xFF495BFF),
+              secondary: Color(0xFFEFEFEF),
+            ),
+          ),
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(
+              primary: const Color(0xFF495BFF),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide.none,
+              ),
+            ),
+          ),
           appBarTheme: AppBarTheme(
             iconTheme: const IconThemeData(color: Color(0xFF323232)),
             backgroundColor: Colors.white,
             elevation: 0.0,
-            actionsIconTheme: const IconThemeData(
-              color: Color(0xFF323232),
-            ),
+            actionsIconTheme: const IconThemeData(color: Color(0xFF323232)),
             centerTitle: true,
             titleTextStyle: GoogleFonts.getFont(
               "Inter",
@@ -50,9 +63,15 @@ class MyApp extends StatelessWidget {
             filled: true,
             fillColor: Colors.white,
             contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
-            border: OutlineInputBorder(
+            enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(style: BorderStyle.none, width: 0.0),
+              borderSide: const BorderSide(style: BorderStyle.solid, width: 1.0, color: Color(0xFFEFEFEF)),
+            ),
+            labelStyle: GoogleFonts.getFont(
+              "Inter",
+              fontWeight: FontWeight.w500,
+              fontSize: 16,
+              color: const Color(0xFF969AA0),
             ),
             hintStyle: GoogleFonts.getFont(
               "Inter",
@@ -110,6 +129,12 @@ class MyApp extends StatelessWidget {
               fontSize: 20,
               fontWeight: FontWeight.w500,
               color: const Color(0xFF969AA0),
+            ),
+            bodyText2: GoogleFonts.getFont(
+              "Inter",
+              fontSize: 20,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF495BFF),
             ),
           ),
         ),
