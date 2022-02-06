@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:logger/logger.dart';
 import 'package:sliding_sheet/sliding_sheet.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter_sound/flutter_sound.dart';
@@ -72,6 +73,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       throw RecordingPermissionException("Permissão do microfone negada");
     }
 
+    await _mRecorder?.setLogLevel(Level.nothing);
+
     await _mRecorder!.openRecorder();
     final session = await AudioSession.instance;
     await session.configure(AudioSessionConfiguration(
@@ -96,7 +99,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     Directory? applicationDirectory = await getDirectory();
 
     _mRecorder!.startRecorder(
-      toFile: "${applicationDirectory.path}/AUDIO.mp4",
+      toFile: "${applicationDirectory.path}/temp.mp4",
       codec: _codec,
     ).then((_) {
       _stopWatchTimer.onExecute.add(StopWatchExecute.start);
@@ -104,12 +107,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     });
   }
 
-  void stopRecorder() async {
-    await _mRecorder!.stopRecorder().then((value) {
+  void stopRecorder(String newTitle) async {
+    await _mRecorder!.stopRecorder().then((value) async {
       setState(() {
         _stopWatchTimer.onExecute.add(StopWatchExecute.reset);
         _mPlaybackReady = true;
       });
+
+      Directory? applicationDirectory = await getDirectory();
+      File audioFile = File('${applicationDirectory.path}/temp.mp4');
+
+      await audioFile.rename('${applicationDirectory.path}/$newTitle.mp4');
     });
   }
 
@@ -135,7 +143,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     await _mRecorder!.stopRecorder().then((value) {
       setState(() {
         _stopWatchTimer.onExecute.add(StopWatchExecute.reset);
-        _mRecorder!.deleteRecord(fileName: "${applicationDirectory.path}/AUDIO.mp4");
+        _mRecorder!.deleteRecord(fileName: "${applicationDirectory.path}/temp.mp4");
       });
     });
   }
@@ -179,11 +187,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       return null;
     }
 
-    return _mPlayer!.isStopped
-        ? play
-        : () {
-            stopPlayer().then((value) => setState(() {}));
-          };
+    return _mPlayer!.isStopped ? play : () {
+      stopPlayer().then((value) => setState(() {}));
+    };
   }
 
   @override
@@ -257,6 +263,114 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       );
     }
 
+    void saveAudioBottomSheet() async {
+      TextEditingController _recordingTitle = TextEditingController();
+
+      await showSlidingBottomSheet(
+        context,
+        builder: (BuildContext context) {
+          return SlidingSheetDialog(
+            elevation: 8,
+            cornerRadius: 15,
+            color: const Color(0xFFF2F2F2),
+            builder: (context, state) {
+              return Material(
+                child: Container(
+                  color: const Color(0xFFF2F2F2),
+                  padding: const EdgeInsets.only(left: 24, right: 24, top: 30, bottom: 30),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12.0),
+                        child: Text(
+                          "Salvar gravação",
+                          style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 20),
+                        ),
+                      ),
+                      TextField(
+                        controller: _recordingTitle,
+                        style: Theme.of(context).textTheme.subtitle1!.copyWith(fontSize: 16),
+                        decoration: const InputDecoration(
+                          labelText: "Título da gravação",
+                        ),
+                      ),
+                      DropdownButton(
+                        items: [].map((value) {
+                          return DropdownMenuItem(
+                            child: Text(value),
+                            value: value,
+                          );
+                        }).toList(),
+                        onChanged: (_) {},
+                        hint: Text("Categoria", style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 16)),
+                        icon: const Icon(
+                          Icons.arrow_drop_down_outlined,
+                          color: Color(0xFF323232),
+                          size: 24,
+                        ),
+                        underline: const SizedBox(),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+            footerBuilder: (context, state) {
+              return Container(
+                color: const Color(0xFFF2F2F2),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 24.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 10.0),
+                          child: SizedBox(
+                            height: 40,
+                            child: ElevatedButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text(
+                                "Cancelar",
+                                style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 16),
+                              ),
+                              style: Theme.of(context).elevatedButtonTheme.style!.copyWith(backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.secondary)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: SizedBox(
+                            height: 40,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                String now = DateFormat.yMMMMd().format(DateTime.now());
+                                String title = _recordingTitle.text.trim().isEmpty ? "Recording_$now" : _recordingTitle.text.trim();
+
+                                stopRecorder(title);
+                                Navigator.pop(context);
+                              },
+                              child: Text(
+                                "Salvar",
+                                style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 16, color: Theme.of(context).buttonTheme.colorScheme?.secondary),
+                              ),
+                              style: Theme.of(context).elevatedButtonTheme.style!.copyWith(backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.primary)),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F2),
       appBar: AppBar(
@@ -273,7 +387,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           )
         ],
         bottom: TabBar(
-          tabs: const [Tab(text: "Gravar"), Tab(text: "Lista")],
+          tabs: const [Tab(text: "Gravar"), Tab(text: "Ouvir")],
           controller: _tabController,
         ),
       ),
@@ -305,7 +419,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 ),
               ),
               Container(
-                width: double.infinity,
                 height: 170,
                 color: const Color(0xFFEAEAEA),
               ),
@@ -346,7 +459,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                         width: 40,
                         height: 40,
                         child: IconButton(
-                          onPressed: () => stopRecorder(),
+                          onPressed: () => saveAudioBottomSheet(),
                           icon: const Icon(Icons.check),
                         ),
                       ),
@@ -429,6 +542,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                 DateTime createdAt = audioFile.lastModifiedSync();
                                 String createdAtFormatted = "";
                                 String fileName = audioFile.name ?? "Gravação";
+                                String duration = durationFormat(snapshot.data ?? const Duration()) ?? "00:00:00";
 
                                 if (createdAt.isToday()) {
                                   createdAtFormatted = timeFormat.format(createdAt);
@@ -458,7 +572,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        durationFormat(snapshot.data) ?? "00:00:00",
+                                        duration,
                                         style: Theme.of(context).textTheme.subtitle2,
                                       ),
                                       Text(
