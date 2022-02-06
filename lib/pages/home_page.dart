@@ -291,6 +291,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       TextField(
                         controller: _recordingTitle,
                         style: Theme.of(context).textTheme.subtitle1!.copyWith(fontSize: 16),
+                        maxLength: 30,
                         decoration: const InputDecoration(
                           labelText: "Título da gravação",
                         ),
@@ -558,9 +559,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                   title: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(
-                                        fileName,
-                                        style: Theme.of(context).textTheme.headline2,
+                                      Flexible(
+                                        child: Text(
+                                          fileName,
+                                          style: Theme.of(context).textTheme.headline2,
+                                        ),
                                       ),
                                       Text(
                                         createdAtFormatted,
