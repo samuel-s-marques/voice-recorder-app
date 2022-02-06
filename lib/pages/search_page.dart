@@ -28,14 +28,7 @@ class _SearchPageState extends State<SearchPage> {
                   children: [
                     TextField(
                       decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        hintText: "Procurar",
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(style: BorderStyle.none, width: 0.0),
-                        ),
+                        labelText: "Procurar",
                         suffixIcon: _hasText
                             ? IconButton(
                                 onPressed: () {},
@@ -63,6 +56,7 @@ class _SearchPageState extends State<SearchPage> {
                           });
                         }
                       },
+                      style: Theme.of(context).textTheme.subtitle1!.copyWith(fontSize: 16),
                       autofocus: true,
                     ),
                     SizedBox(
