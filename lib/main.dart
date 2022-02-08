@@ -8,16 +8,14 @@ import 'package:wiredash/wiredash.dart';
 
 void main() async {
   await dotenv.load(fileName: '.env');
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  final _navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   Widget build(BuildContext context) {
-    final _navigatorKey = GlobalKey<NavigatorState>();
-
     return Wiredash(
       projectId: dotenv.get("project_id"),
       secret: dotenv.get("secret"),
