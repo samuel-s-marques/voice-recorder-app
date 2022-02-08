@@ -25,8 +25,7 @@ class MyApp extends StatelessWidget {
         title: 'Voice Recorder',
         debugShowCheckedModeBanner: false,
         themeMode: ThemeMode.light,
-        // home: const HomePage(),
-        initialRoute: "/settings",
+        home: const HomePage(),
         routes: {
           "/search": (context) => const SearchPage(),
           "/settings": (context) => const SettingsPage(),
@@ -37,6 +36,9 @@ class MyApp extends StatelessWidget {
               primary: Color(0xFF495BFF),
               secondary: Color(0xFFEFEFEF),
             ),
+          ),
+          popupMenuTheme: PopupMenuThemeData(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
           scaffoldBackgroundColor: const Color(0xFFF2F2F2),
           listTileTheme: ListTileThemeData(
