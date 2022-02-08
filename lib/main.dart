@@ -40,6 +40,15 @@ class MyApp extends StatelessWidget {
               secondary: Color(0xFFEFEFEF),
             ),
           ),
+          scaffoldBackgroundColor: const Color(0xFFF2F2F2),
+          listTileTheme: ListTileThemeData(
+            dense: true,
+            tileColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+              side: const BorderSide(width: 1.0, color: Color(0xFFF4F6F9)),
+            ),
+          ),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
               primary: const Color(0xFF495BFF),
