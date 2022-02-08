@@ -39,6 +39,12 @@ class MyApp extends StatelessWidget {
           ),
           popupMenuTheme: PopupMenuThemeData(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            textStyle: GoogleFonts.getFont(
+              "Inter",
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF23262F),
+            ),
           ),
           scaffoldBackgroundColor: const Color(0xFFF2F2F2),
           listTileTheme: ListTileThemeData(
