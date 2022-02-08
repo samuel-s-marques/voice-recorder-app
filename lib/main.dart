@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:voice_recorder_app/pages/home_page.dart';
 import 'package:voice_recorder_app/pages/search_page.dart';
+import 'package:voice_recorder_app/pages/settings_page.dart';
 import 'package:wiredash/wiredash.dart';
 
 void main() async {
@@ -26,9 +27,11 @@ class MyApp extends StatelessWidget {
         title: 'Voice Recorder',
         debugShowCheckedModeBanner: false,
         themeMode: ThemeMode.light,
-        home: const HomePage(),
+        // home: const HomePage(),
+        initialRoute: "/settings",
         routes: {
           "/search": (context) => const SearchPage(),
+          "/settings": (context) => const SettingsPage(),
         },
         theme: ThemeData(
           buttonTheme: const ButtonThemeData(
