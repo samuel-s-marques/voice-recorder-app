@@ -19,9 +19,17 @@ class SettingsPage extends StatelessWidget {
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20),
-          child: Column(
+          child: Wrap(
+            runSpacing: 10,
             children: [
               SettingsTile("Linguagem", "Português", () {}),
+              SettingsTile("Modo", "Claro", () {}),
+              SettingsTile("Áudio", "", () {}),
+              SettingsTile("Arquivos", "", () {}),
+              SettingsTile("Lixo", "", () {}),
+              SettingsTile("Privacidade", "", () {}),
+              SettingsTile("Ajuda", "", () {}),
+              SettingsTile("Sobre", "1.0.0", () {}),
             ],
           ),
         ),
