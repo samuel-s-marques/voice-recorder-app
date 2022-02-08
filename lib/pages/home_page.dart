@@ -98,10 +98,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   void record() async {
     Directory? applicationDirectory = await getDirectory();
 
-    _mRecorder!.startRecorder(
+    _mRecorder!
+        .startRecorder(
       toFile: "${applicationDirectory.path}/temp.mp4",
       codec: _codec,
-    ).then((_) {
+    )
+        .then((_) {
       _stopWatchTimer.onExecute.add(StopWatchExecute.start);
       setState(() {});
     });
@@ -187,9 +189,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       return null;
     }
 
-    return _mPlayer!.isStopped ? play : () {
-      stopPlayer().then((value) => setState(() {}));
-    };
+    return _mPlayer!.isStopped
+        ? play
+        : () {
+            stopPlayer().then((value) => setState(() {}));
+          };
   }
 
   @override
@@ -335,7 +339,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                 "Cancelar",
                                 style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 16),
                               ),
-                              style: Theme.of(context).elevatedButtonTheme.style!.copyWith(backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.secondary)),
+                              style: Theme.of(context).elevatedButtonTheme.style!.copyWith(
+                                  backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.secondary)),
                             ),
                           ),
                         ),
@@ -355,9 +360,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                               },
                               child: Text(
                                 "Salvar",
-                                style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 16, color: Theme.of(context).buttonTheme.colorScheme?.secondary),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyText1!
+                                    .copyWith(fontSize: 16, color: Theme.of(context).buttonTheme.colorScheme?.secondary),
                               ),
-                              style: Theme.of(context).elevatedButtonTheme.style!.copyWith(backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.primary)),
+                              style: Theme.of(context)
+                                  .elevatedButtonTheme
+                                  .style!
+                                  .copyWith(backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.primary)),
                             ),
                           ),
                         ),
@@ -372,20 +383,32 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       );
     }
 
+    void handleTap(String value) {
+      switch (value) {
+        case "Configurações":
+          Navigator.pushNamed(context, "/settings");
+          break;
+        case "Lixeira":
+          break;
+      }
+    }
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F2),
       appBar: AppBar(
         toolbarHeight: 90,
-        title: const Text(
-          "Gravador de Voz",
-        ),
+        title: const Text("Gravador de Voz"),
         actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.more_vert,
-            ),
-          )
+          PopupMenuButton(
+            onSelected: handleTap,
+            itemBuilder: (BuildContext context) {
+              return ['Configurações', 'Lixeira'].map((String choice) {
+                return PopupMenuItem(
+                  child: Text(choice),
+                  value: choice,
+                );
+              }).toList();
+            },
+          ),
         ],
         bottom: TabBar(
           tabs: const [Tab(text: "Gravar"), Tab(text: "Ouvir")],
@@ -553,9 +576,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
                                 return ListTile(
                                   onTap: () => showAudioBottomSheet(),
-                                  dense: true,
-                                  tileColor: Colors.white,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                   title: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
