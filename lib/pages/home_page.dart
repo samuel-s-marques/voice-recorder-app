@@ -393,6 +393,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       }
     }
 
+    List<String> getItemsList() {
+      if (_tabController.index == 0) {
+        return ['Configurações', 'Lixeira'];
+      } else {
+        return ['Categorias', 'Ordem', 'Configurações', 'Lixeira'];
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 90,
@@ -401,7 +409,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           PopupMenuButton(
             onSelected: handleTap,
             itemBuilder: (BuildContext context) {
-              return ['Configurações', 'Lixeira'].map((String choice) {
+              return getItemsList().map((String choice) {
                 return PopupMenuItem(
                   child: Text(choice),
                   value: choice,
