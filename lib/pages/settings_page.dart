@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:voice_recorder_app/widgets/settings_tile.dart';
+import 'package:wiredash/wiredash.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -30,6 +31,7 @@ class SettingsPage extends StatelessWidget {
               SettingsTile("Privacidade", "", () {}),
               SettingsTile("Ajuda", "", () {}),
               SettingsTile("Sobre", "1.0.0", () {}),
+              SettingsTile("Feedback", "", () => Wiredash.of(context)?.show()),
             ],
           ),
         ),
