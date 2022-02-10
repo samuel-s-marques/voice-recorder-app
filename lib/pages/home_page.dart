@@ -499,21 +499,42 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       ),
                     ),
                   ),
-                  DropdownButton(
-                    items: [].map((value) {
-                      return DropdownMenuItem(
-                        child: Text(value),
-                        value: value,
-                      );
-                    }).toList(),
-                    onChanged: (_) {},
-                    hint: Text("Categoria", style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 16)),
-                    icon: const Icon(
-                      Icons.arrow_drop_down_outlined,
-                      color: Color(0xFF323232),
-                      size: 24,
-                    ),
-                    underline: const SizedBox(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      DropdownButton(
+                        items: ["Por data", "Por "].map((value) {
+                          return DropdownMenuItem(
+                            child: Text(value),
+                            value: value,
+                          );
+                        }).toList(),
+                        onChanged: (_) {},
+                        hint: Text("Categoria", style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 16)),
+                        icon: const Icon(
+                          Icons.arrow_drop_down_outlined,
+                          color: Color(0xFF323232),
+                          size: 24,
+                        ),
+                        underline: const SizedBox(),
+                      ),
+                      DropdownButton(
+                        items: [].map((value) {
+                          return DropdownMenuItem(
+                            child: Text(value),
+                            value: value,
+                          );
+                        }).toList(),
+                        onChanged: (_) {},
+                        hint: Text("Ordenar", style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 16)),
+                        icon: const Icon(
+                          Icons.arrow_drop_down_outlined,
+                          color: Color(0xFF323232),
+                          size: 24,
+                        ),
+                        underline: const SizedBox(),
+                      ),
+                    ],
                   ),
                   FutureBuilder(
                     future: getDirectory(),
