@@ -503,7 +503,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       DropdownButton(
-                        items: ["Por data", "A-Z", "Z-A", "Por tamanho"].map((value) {
+                        items: [].map((value) {
                           return DropdownMenuItem(
                             child: Text(value),
                             value: value,
@@ -519,7 +519,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                         underline: const SizedBox(),
                       ),
                       DropdownButton(
-                        items: [].map((value) {
+                        items: ["Por data", "A-Z", "Z-A", "Por tamanho"].map((value) {
                           return DropdownMenuItem(
                             child: Text(value),
                             value: value,
