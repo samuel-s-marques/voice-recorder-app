@@ -21,7 +21,7 @@ class HomePage extends StatefulWidget {
 
 typedef Fn = void Function();
 
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   static const List<Tab> tabs = <Tab>[
     Tab(text: 'Gravar'),
     Tab(text: 'Lista'),
@@ -32,31 +32,28 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   final StopWatchTimer _stopWatchTimer = StopWatchTimer();
   late TabController _tabController;
   final Codec _codec = Codec.aacMP4;
-  bool _mPlayerIsInited = false;
+  final player = AudioPlayer();
   bool _mRecorderIsInited = false;
-  bool _mPlaybackReady = false;
+  int beingPlayed = -1;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: tabs.length, vsync: this);
 
-    _mPlayer!.openPlayer().then((value) {
-      setState(() {
-        _mPlayerIsInited = true;
-      });
-    });
-
     openTheRecorder().then((value) {
       setState(() {
         _mRecorderIsInited = true;
       });
     });
+
+    WidgetsBinding.instance?.addObserver(this);
   }
 
   @override
   void dispose() async {
-    stopPlayer();
+    WidgetsBinding.instance?.removeObserver(this);
+    player.dispose();
     _mPlayer!.closePlayer();
     _mPlayer = null;
 
@@ -65,6 +62,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
     _tabController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      player.stop();
+    }
   }
 
   Future<void> openTheRecorder() async {
@@ -97,6 +101,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   void record() async {
     Directory? applicationDirectory = await getDirectory();
+    player.stop();
 
     _mRecorder!
         .startRecorder(
@@ -113,7 +118,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     await _mRecorder!.stopRecorder().then((value) async {
       setState(() {
         _stopWatchTimer.onExecute.add(StopWatchExecute.reset);
-        _mPlaybackReady = true;
       });
 
       Directory? applicationDirectory = await getDirectory();
@@ -150,24 +154,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     });
   }
 
-  void play() async {
-    await _mPlayer!.startPlayer(
-      fromURI: "/assets/audios/audio.m4a",
-      codec: Codec.mp3,
-      whenFinished: () {
-        setState(() {});
-      },
-    );
-
-    setState(() {});
-  }
-
-  Future<void> stopPlayer() async {
-    if (_mPlayer != null) {
-      await _mPlayer!.stopPlayer();
-    }
-  }
-
   Fn? getRecorderFn() {
     if (!_mRecorderIsInited || !_mPlayer!.isStopped) {
       return null;
@@ -182,18 +168,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     }
 
     return record;
-  }
-
-  Fn? getPlaybackFn() {
-    if (!_mPlayerIsInited) {
-      return null;
-    }
-
-    return _mPlayer!.isStopped
-        ? play
-        : () {
-            stopPlayer().then((value) => setState(() {}));
-          };
   }
 
   @override
@@ -236,7 +210,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                               width: 56,
                               height: 56,
                               child: ElevatedButton(
-                                onPressed: getPlaybackFn(),
+                                onPressed: () {},
                                 child: Icon(_mPlayer!.isPlaying ? Icons.pause : Icons.play_arrow),
                                 style: ButtonStyle(
                                   backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFFFF5656)),
@@ -565,68 +539,67 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           itemBuilder: (BuildContext context, int index) {
                             File audioFile = File(audiosFiles[index].path);
 
-                            return FutureBuilder(
-                              future: AudioPlayer().setUrl(audioFile.path),
-                              builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-                                DateFormat dayFormat = DateFormat.yMd();
-                                DateFormat timeFormat = DateFormat.Hm();
-                                String fileSize = getFileSize(audioFile.lengthSync(), 1);
-                                DateTime createdAt = audioFile.lastModifiedSync();
-                                String createdAtFormatted = "";
-                                String fileName = audioFile.name ?? "Gravação";
-                                String duration = durationFormat(snapshot.data ?? const Duration()) ?? "00:00:00";
+                            DateFormat dayFormat = DateFormat.yMd();
+                            DateFormat timeFormat = DateFormat.Hm();
+                            String fileSize = getFileSize(audioFile.lengthSync(), 1);
+                            DateTime createdAt = audioFile.lastModifiedSync();
+                            String createdAtFormatted = "";
+                            String fileName = audioFile.name ?? "Gravação";
 
-                                if (createdAt.isToday()) {
-                                  createdAtFormatted = timeFormat.format(createdAt);
-                                } else {
-                                  createdAtFormatted = dayFormat.format(createdAt);
-                                }
+                            if (createdAt.isToday()) {
+                              createdAtFormatted = timeFormat.format(createdAt);
+                            } else {
+                              createdAtFormatted = dayFormat.format(createdAt);
+                            }
 
-                                return ListTile(
-                                  onTap: () => showAudioBottomSheet(),
-                                  title: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Flexible(
-                                        child: Text(
-                                          fileName,
-                                          style: Theme.of(context).textTheme.headline2,
-                                        ),
-                                      ),
-                                      Text(
-                                        createdAtFormatted,
-                                        style: Theme.of(context).textTheme.subtitle2,
-                                      ),
-                                    ],
-                                  ),
-                                  subtitle: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        duration,
-                                        style: Theme.of(context).textTheme.subtitle2,
-                                      ),
-                                      Text(
-                                        fileSize,
-                                        style: Theme.of(context).textTheme.subtitle2,
-                                      ),
-                                    ],
-                                  ),
-                                  leading: CircleAvatar(
-                                    radius: 35,
-                                    backgroundColor: const Color(0xFFEFEFEF),
-                                    child: IconButton(
-                                      padding: EdgeInsets.zero,
-                                      onPressed: () {},
-                                      icon: const Icon(
-                                        Icons.play_arrow,
-                                        color: Color(0xFF323232),
-                                      ),
-                                      iconSize: 30,
+                            return ListTile(
+                              onTap: () => showAudioBottomSheet(),
+                              title: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      fileName,
+                                      style: Theme.of(context).textTheme.headline2,
                                     ),
                                   ),
-                                );
-                              },
+                                  Text(
+                                    createdAtFormatted,
+                                    style: Theme.of(context).textTheme.subtitle2,
+                                  ),
+                                ],
+                              ),
+                              subtitle: Text(
+                                fileSize,
+                                style: Theme.of(context).textTheme.subtitle2,
+                              ),
+                              leading: CircleAvatar(
+                                radius: 35,
+                                backgroundColor: const Color(0xFFEFEFEF),
+                                child: IconButton(
+                                  padding: EdgeInsets.zero,
+                                  onPressed: () async {
+                                    if (player.playing && beingPlayed == index) {
+                                      setState(() {
+                                        beingPlayed = -1;
+                                        player.pause();
+                                      });
+                                    } else {
+                                      await player.setFilePath(audioFile.path);
+
+                                      setState(() {
+                                        beingPlayed = index;
+                                        player.play();
+                                      });
+                                    }
+                                  },
+                                  icon: Icon(
+                                    beingPlayed == index ? Icons.pause : Icons.play_arrow,
+                                    color: const Color(0xFF323232),
+                                  ),
+                                  iconSize: 30,
+                                ),
+                              ),
                             );
                           },
                         );
