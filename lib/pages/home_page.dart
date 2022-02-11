@@ -243,6 +243,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
     void saveAudioBottomSheet() async {
       TextEditingController _recordingTitle = TextEditingController();
+      String? selectedCategory;
 
       await showSlidingBottomSheet(
         context,
@@ -253,45 +254,80 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             color: const Color(0xFFF2F2F2),
             builder: (context, state) {
               return Material(
-                child: Container(
-                  color: const Color(0xFFF2F2F2),
-                  padding: const EdgeInsets.only(left: 24, right: 24, top: 30, bottom: 30),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12.0),
-                        child: Text(
-                          "Salvar gravação",
-                          style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 20),
-                        ),
+                child: StatefulBuilder(
+                  builder: (BuildContext context, void Function(void Function()) setState) {
+                    return Container(
+                      color: const Color(0xFFF2F2F2),
+                      padding: const EdgeInsets.only(left: 24, right: 24, top: 30, bottom: 30),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: Text(
+                              "Salvar gravação",
+                              style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 20),
+                            ),
+                          ),
+                          TextField(
+                            controller: _recordingTitle,
+                            style: Theme.of(context).textTheme.subtitle1!.copyWith(fontSize: 16),
+                            maxLength: 30,
+                            decoration: const InputDecoration(
+                              labelText: "Título da gravação",
+                            ),
+                          ),
+                          FutureBuilder(
+                            future: getDirectory(),
+                            builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+                              List<String>? categories = [];
+
+                              if (snapshot.hasData) {
+                                Directory dir = snapshot.data;
+                                List<FileSystemEntity> categoryList = dir.listSync(recursive: true, followLinks: false);
+
+                                if (categoryList.isNotEmpty) {
+                                  List<String?> list = categoryList.map((category) {
+                                    if (category.statSync().type == FileSystemEntityType.directory) {
+                                      if (category.name != null) {
+                                        return category.name ?? "Categoria";
+                                      }
+                                    }
+                                  }).toList();
+
+                                  list.removeWhere((element) => element == null);
+                                  categories = list.cast<String>();
+                                }
+                              }
+
+                              return DropdownButton(
+                                items: categories.map((value) {
+                                  return DropdownMenuItem(
+                                    child: Text(value),
+                                    value: value,
+                                  );
+                                }).toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    selectedCategory = value.toString();
+                                  });
+                                },
+                                hint: Text("Categoria", style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 16)),
+                                value: selectedCategory ?? null,
+                                icon: const Icon(
+                                  Icons.arrow_drop_down_outlined,
+                                  color: Color(0xFF323232),
+                                  size: 24,
+                                ),
+                                underline: const SizedBox(),
+                                isExpanded: true,
+                              );
+                            },
+                          ),
+                        ],
                       ),
-                      TextField(
-                        controller: _recordingTitle,
-                        style: Theme.of(context).textTheme.subtitle1!.copyWith(fontSize: 16),
-                        maxLength: 30,
-                        decoration: const InputDecoration(
-                          labelText: "Título da gravação",
-                        ),
-                      ),
-                      DropdownButton(
-                        items: [].map((value) {
-                          return DropdownMenuItem(
-                            child: Text(value),
-                            value: value,
-                          );
-                        }).toList(),
-                        onChanged: (_) {},
-                        hint: Text("Categoria", style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 16)),
-                        icon: const Icon(
-                          Icons.arrow_drop_down_outlined,
-                          color: Color(0xFF323232),
-                          size: 24,
-                        ),
-                        underline: const SizedBox(),
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
               );
             },
@@ -364,6 +400,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           break;
         case "Lixeira":
           break;
+        case "Categorias":
+          Navigator.pushNamed(context, "/categories");
+          break;
       }
     }
 
@@ -371,7 +410,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       if (_tabController.index == 0) {
         return ['Configurações', 'Lixeira'];
       } else {
-        return ['Categorias', 'Ordem', 'Configurações', 'Lixeira'];
+        return ['Categorias', 'Configurações', 'Lixeira'];
       }
     }
 
@@ -402,9 +441,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         children: [
           Column(
             children: [
-              const SizedBox(
-                height: 40,
-              ),
+              const SizedBox(height: 40),
               StreamBuilder<int>(
                 stream: _stopWatchTimer.rawTime,
                 initialData: 0,
@@ -491,7 +528,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       onTap: () => Navigator.pushNamed(context, "/search"),
                       readOnly: true,
                       decoration: const InputDecoration(
-                        hintText: "Procurar",
+                        hintText: "Pesquisar",
                         suffixIcon: Icon(
                           Icons.search,
                           color: Color(0xFF777777),
@@ -505,7 +542,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       DropdownButton(
                         items: [].map((value) {
                           return DropdownMenuItem(
-                            child: Text(value),
+                            child: Text(value, style: Theme.of(context).popupMenuTheme.textStyle),
                             value: value,
                           );
                         }).toList(),
@@ -517,11 +554,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           size: 24,
                         ),
                         underline: const SizedBox(),
+                        borderRadius: BorderRadius.circular(10),
                       ),
                       DropdownButton(
-                        items: ["Por data", "A-Z", "Z-A", "Por tamanho"].map((value) {
+                        items: ["Data", "A-Z", "Z-A", "Tamanho"].map((value) {
                           return DropdownMenuItem(
-                            child: Text(value),
+                            child: Text(value, style: Theme.of(context).popupMenuTheme.textStyle),
                             value: value,
                           );
                         }).toList(),
@@ -533,6 +571,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           size: 24,
                         ),
                         underline: const SizedBox(),
+                        borderRadius: BorderRadius.circular(10),
                       ),
                     ],
                   ),
@@ -558,6 +597,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           separatorBuilder: (context, index) => const SizedBox(height: 5),
                           itemCount: audiosFiles.length,
                           itemBuilder: (BuildContext context, int index) {
+                            if (audiosFiles[index].statSync().type != FileSystemEntityType.file) {
+                              return Container();
+                            }
+
                             File audioFile = File(audiosFiles[index].path);
 
                             DateFormat dayFormat = DateFormat.yMd();
