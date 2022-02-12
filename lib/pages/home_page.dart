@@ -770,6 +770,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   child: ElevatedButton(
                     onPressed: () async {
                       await file.delete();
+                      setState(() {});
                       Navigator.pop(context);
                     },
                     child: Text(
