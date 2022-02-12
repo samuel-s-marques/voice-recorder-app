@@ -39,6 +39,7 @@ class MyApp extends StatelessWidget {
               secondary: Color(0xFFEFEFEF),
             ),
           ),
+          floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Color(0xFF495BFF)),
           popupMenuTheme: PopupMenuThemeData(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             textStyle: GoogleFonts.getFont(
