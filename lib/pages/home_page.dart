@@ -81,23 +81,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     }
 
     await _mRecorder?.setLogLevel(Level.nothing);
-
     await _mRecorder!.openRecorder();
-    final session = await AudioSession.instance;
-    await session.configure(AudioSessionConfiguration(
-      avAudioSessionCategory: AVAudioSessionCategory.playAndRecord,
-      avAudioSessionCategoryOptions: AVAudioSessionCategoryOptions.allowBluetooth | AVAudioSessionCategoryOptions.defaultToSpeaker,
-      avAudioSessionMode: AVAudioSessionMode.spokenAudio,
-      avAudioSessionRouteSharingPolicy: AVAudioSessionRouteSharingPolicy.defaultPolicy,
-      avAudioSessionSetActiveOptions: AVAudioSessionSetActiveOptions.none,
-      androidAudioAttributes: const AndroidAudioAttributes(
-        contentType: AndroidAudioContentType.speech,
-        flags: AndroidAudioFlags.none,
-        usage: AndroidAudioUsage.voiceCommunication,
-      ),
-      androidAudioFocusGainType: AndroidAudioFocusGainType.gain,
-      androidWillPauseWhenDucked: true,
-    ));
 
     _mRecorderIsInited = true;
   }
@@ -636,12 +620,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                               subtitle: Text(
                                 "$fileSize \u2022 $createdAtFormatted",
                                 style: Theme.of(context).textTheme.subtitle2,
-                              ),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.more_vert),
-                                onPressed: () {
-                                  Share.shareFiles([audioFile.path], text: fileName);
-                                },
                               ),
                               leading: CircleAvatar(
                                 radius: 35,
