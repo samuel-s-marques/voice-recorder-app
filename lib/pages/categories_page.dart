@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sliding_sheet/sliding_sheet.dart';
@@ -44,6 +45,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                       TextField(
                         controller: _categoryTitle,
                         style: Theme.of(context).textTheme.subtitle1!.copyWith(fontSize: 16),
+                        inputFormatters: [FilteringTextInputFormatter.allow(RegExp("[0-9a-zA-Z ]"))],
                         maxLength: 30,
                         decoration: const InputDecoration(
                           labelText: "Título da categoria",
@@ -131,6 +133,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 20.0),
                 child: TextField(
+                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp("[0-9a-zA-Z ]"))],
                   decoration: const InputDecoration(
                     hintText: "Pesquisar",
                     suffixIcon: Icon(
