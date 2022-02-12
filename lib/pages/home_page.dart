@@ -407,6 +407,391 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       }
     }
 
+    void rename(File file) async {
+      String path = file.path;
+
+      TextEditingController _recordingTitle = TextEditingController();
+      String? selectedCategory;
+
+      await showSlidingBottomSheet(
+        context,
+        builder: (BuildContext context) {
+          return SlidingSheetDialog(
+            elevation: 8,
+            cornerRadius: 15,
+            color: const Color(0xFFF2F2F2),
+            builder: (context, state) {
+              return Material(
+                child: StatefulBuilder(
+                  builder: (BuildContext context, void Function(void Function()) setState) {
+                    return Container(
+                      color: const Color(0xFFF2F2F2),
+                      padding: const EdgeInsets.only(left: 24, right: 24, top: 30, bottom: 30),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: Text(
+                              "Renomear gravação",
+                              style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 20),
+                            ),
+                          ),
+                          TextField(
+                            controller: _recordingTitle,
+                            style: Theme.of(context).textTheme.subtitle1!.copyWith(fontSize: 16),
+                            maxLength: 30,
+                            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r"^[\p{L}\p{N} ]+$", unicode: true))],
+                            textCapitalization: TextCapitalization.sentences,
+                            decoration: const InputDecoration(
+                              labelText: "Novo título da gravação",
+                            ),
+                          ),
+                          FutureBuilder(
+                            future: getDirectory(),
+                            builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+                              List<String>? categories = [];
+
+                              if (snapshot.hasData) {
+                                Directory dir = snapshot.data;
+                                List<FileSystemEntity> categoryList = dir.listSync(recursive: true, followLinks: false);
+
+                                if (categoryList.isNotEmpty) {
+                                  List<String?> list = categoryList.map((category) {
+                                    if (category.statSync().type == FileSystemEntityType.directory) {
+                                      if (category.name != null) {
+                                        return category.name ?? "Categoria";
+                                      }
+                                    }
+                                  }).toList();
+
+                                  list.removeWhere((element) => element == null);
+                                  categories = list.cast<String>();
+                                }
+                              }
+
+                              return DropdownButton(
+                                items: categories.map((value) {
+                                  return DropdownMenuItem(
+                                    child: Text(value),
+                                    value: value,
+                                  );
+                                }).toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    selectedCategory = value.toString();
+                                  });
+                                },
+                                hint: Text("Categoria", style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 16)),
+                                value: selectedCategory,
+                                icon: const Icon(
+                                  Icons.arrow_drop_down_outlined,
+                                  color: Color(0xFF323232),
+                                  size: 24,
+                                ),
+                                underline: const SizedBox(),
+                                isExpanded: true,
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+            footerBuilder: (context, state) {
+              return Container(
+                color: const Color(0xFFF2F2F2),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 24.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 10.0),
+                          child: SizedBox(
+                            height: 40,
+                            child: ElevatedButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text(
+                                "Cancelar",
+                                style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 16),
+                              ),
+                              style: Theme.of(context).elevatedButtonTheme.style!.copyWith(
+                                  backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.secondary)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: SizedBox(
+                            height: 40,
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                String now = DateFormat.yMMMMd().format(DateTime.now());
+                                String title = _recordingTitle.text.trim().isEmpty ? "Recording_$now" : _recordingTitle.text.trim();
+                                int lastSeparator = path.lastIndexOf(Platform.pathSeparator);
+
+                                if (selectedCategory != null && selectedCategory!.isNotEmpty) {
+                                  title = "$selectedCategory/$title";
+                                }
+
+                                String newPath = path.substring(0, lastSeparator + 1) + title + _fileExtension;
+
+                                await file.rename(newPath);
+                                Navigator.pop(context);
+                              },
+                              child: Text(
+                                "Salvar",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyText1!
+                                    .copyWith(fontSize: 16, color: Theme.of(context).buttonTheme.colorScheme?.secondary),
+                              ),
+                              style: Theme.of(context)
+                                  .elevatedButtonTheme
+                                  .style!
+                                  .copyWith(backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.primary)),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      );
+    }
+
+    void categorize(File file) async {
+      String path = file.path;
+
+      TextEditingController _recordingTitle = TextEditingController();
+      _recordingTitle.text = file.name!;
+      String? selectedCategory;
+
+      await showSlidingBottomSheet(
+        context,
+        builder: (BuildContext context) {
+          return SlidingSheetDialog(
+            elevation: 8,
+            cornerRadius: 15,
+            color: const Color(0xFFF2F2F2),
+            builder: (context, state) {
+              return Material(
+                child: StatefulBuilder(
+                  builder: (BuildContext context, void Function(void Function()) setState) {
+                    return Container(
+                      color: const Color(0xFFF2F2F2),
+                      padding: const EdgeInsets.only(left: 24, right: 24, top: 30, bottom: 30),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: Text(
+                              "Renomear gravação",
+                              style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 20),
+                            ),
+                          ),
+                          TextField(
+                            controller: _recordingTitle,
+                            style: Theme.of(context).textTheme.subtitle1!.copyWith(fontSize: 16),
+                            maxLength: 30,
+                            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r"^[\p{L}\p{N} ]+$", unicode: true))],
+                            textCapitalization: TextCapitalization.sentences,
+                            decoration: const InputDecoration(
+                              labelText: "Novo título da gravação",
+                            ),
+                          ),
+                          FutureBuilder(
+                            future: getDirectory(),
+                            builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+                              List<String>? categories = [];
+
+                              if (snapshot.hasData) {
+                                Directory dir = snapshot.data;
+                                List<FileSystemEntity> categoryList = dir.listSync(recursive: true, followLinks: false);
+
+                                if (categoryList.isNotEmpty) {
+                                  List<String?> list = categoryList.map((category) {
+                                    if (category.statSync().type == FileSystemEntityType.directory) {
+                                      if (category.name != null) {
+                                        return category.name ?? "Categoria";
+                                      }
+                                    }
+                                  }).toList();
+
+                                  list.removeWhere((element) => element == null);
+                                  categories = list.cast<String>();
+                                }
+                              }
+
+                              return DropdownButton(
+                                items: categories.map((value) {
+                                  return DropdownMenuItem(
+                                    child: Text(value),
+                                    value: value,
+                                  );
+                                }).toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    selectedCategory = value.toString();
+                                  });
+                                },
+                                hint: Text("Categoria", style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 16)),
+                                value: selectedCategory,
+                                icon: const Icon(
+                                  Icons.arrow_drop_down_outlined,
+                                  color: Color(0xFF323232),
+                                  size: 24,
+                                ),
+                                underline: const SizedBox(),
+                                isExpanded: true,
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+            footerBuilder: (context, state) {
+              return Container(
+                color: const Color(0xFFF2F2F2),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 24.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 10.0),
+                          child: SizedBox(
+                            height: 40,
+                            child: ElevatedButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text(
+                                "Cancelar",
+                                style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 16),
+                              ),
+                              style: Theme.of(context).elevatedButtonTheme.style!.copyWith(
+                                  backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.secondary)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: SizedBox(
+                            height: 40,
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                String now = DateFormat.yMMMMd().format(DateTime.now());
+                                String title = _recordingTitle.text.trim().isEmpty ? "Recording_$now" : _recordingTitle.text.trim();
+                                int lastSeparator = path.lastIndexOf(Platform.pathSeparator);
+
+                                if (selectedCategory != null && selectedCategory!.isNotEmpty) {
+                                  title = "$selectedCategory/$title";
+                                }
+
+                                String newPath = path.substring(0, lastSeparator + 1) + title + _fileExtension;
+
+                                await file.rename(newPath);
+                                Navigator.pop(context);
+                              },
+                              child: Text(
+                                "Salvar",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyText1!
+                                    .copyWith(fontSize: 16, color: Theme.of(context).buttonTheme.colorScheme?.secondary),
+                              ),
+                              style: Theme.of(context)
+                                  .elevatedButtonTheme
+                                  .style!
+                                  .copyWith(backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.primary)),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      );
+    }
+
+    void delete(File file) async {
+      return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            elevation: 8,
+            backgroundColor: const Color(0xFFF2F2F2),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            title: const Text("Tem certeza que quer deletar este áudio?"),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 10.0),
+                child: SizedBox(
+                  height: 40,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      "Cancelar",
+                      style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 16),
+                    ),
+                    style: Theme.of(context)
+                        .elevatedButtonTheme
+                        .style!
+                        .copyWith(backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.secondary)),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 10.0),
+                child: SizedBox(
+                  height: 40,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await file.delete();
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      "Salvar",
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyText1!
+                          .copyWith(fontSize: 16, color: Theme.of(context).buttonTheme.colorScheme?.secondary),
+                    ),
+                    style: Theme.of(context)
+                        .elevatedButtonTheme
+                        .style!
+                        .copyWith(backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.primary)),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 90,
@@ -620,6 +1005,32 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                               subtitle: Text(
                                 "$fileSize \u2022 $createdAtFormatted",
                                 style: Theme.of(context).textTheme.subtitle2,
+                              ),
+                              trailing: PopupMenuButton(
+                                onSelected: (value) {
+                                  switch (value) {
+                                    case "Compartilhar":
+                                      Share.shareFiles([audioFile.path], text: fileName);
+                                      break;
+                                    case "Renomear":
+                                      rename(audioFile);
+                                      break;
+                                    case "Categorizar":
+                                      categorize(audioFile);
+                                      break;
+                                    case "Deletar":
+                                      delete(audioFile);
+                                      break;
+                                  }
+                                },
+                                itemBuilder: (BuildContext context) {
+                                  return ["Compartilhar", "Renomear", "Categorizar", "Deletar"].map((String choice) {
+                                    return PopupMenuItem(
+                                      child: Text(choice),
+                                      value: choice,
+                                    );
+                                  }).toList();
+                                },
                               ),
                               leading: CircleAvatar(
                                 radius: 35,
