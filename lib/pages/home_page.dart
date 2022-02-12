@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:logger/logger.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:sliding_sheet/sliding_sheet.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter_sound/flutter_sound.dart';
@@ -32,7 +33,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   FlutterSoundRecorder? _mRecorder = FlutterSoundRecorder();
   final StopWatchTimer _stopWatchTimer = StopWatchTimer();
   late TabController _tabController;
-  final Codec _codec = Codec.aacMP4;
+  final Codec _codec = Codec.pcm16WAV;
+  final String _fileExtension = "wav";
   final player = AudioPlayer();
   bool _mRecorderIsInited = false;
   int beingPlayed = -1;
@@ -106,7 +108,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
     _mRecorder!
         .startRecorder(
-      toFile: "${applicationDirectory.path}/temp.mp4",
+      toFile: "${applicationDirectory.path}/temp.$_fileExtension",
       codec: _codec,
     )
         .then((_) {
@@ -122,9 +124,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       });
 
       Directory? applicationDirectory = await getDirectory();
-      File audioFile = File('${applicationDirectory.path}/temp.mp4');
+      File audioFile = File('${applicationDirectory.path}/temp.$_fileExtension');
 
-      await audioFile.rename('${applicationDirectory.path}/$newTitle.mp4');
+      await audioFile.rename('${applicationDirectory.path}/$newTitle.$_fileExtension');
     });
   }
 
@@ -150,7 +152,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     await _mRecorder!.stopRecorder().then((value) {
       setState(() {
         _stopWatchTimer.onExecute.add(StopWatchExecute.reset);
-        _mRecorder!.deleteRecord(fileName: "${applicationDirectory.path}/temp.mp4");
+        _mRecorder!.deleteRecord(fileName: "${applicationDirectory.path}/temp.$_fileExtension");
       });
     });
   }
@@ -368,7 +370,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                 String now = DateFormat.yMMMMd().format(DateTime.now());
                                 String title = _recordingTitle.text.trim().isEmpty ? "Recording_$now" : _recordingTitle.text.trim();
 
-                                if (selectedCategory!.isNotEmpty) {
+                                if (selectedCategory != null && selectedCategory!.isNotEmpty) {
                                   title = "$selectedCategory/$title";
                                 }
 
@@ -637,7 +639,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                               ),
                               trailing: IconButton(
                                 icon: const Icon(Icons.more_vert),
-                                onPressed: () {},
+                                onPressed: () {
+                                  Share.shareFiles([audioFile.path], text: fileName);
+                                },
                               ),
                               leading: CircleAvatar(
                                 radius: 35,
