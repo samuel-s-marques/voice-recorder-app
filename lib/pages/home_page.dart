@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:logger/logger.dart';
@@ -273,6 +274,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                             controller: _recordingTitle,
                             style: Theme.of(context).textTheme.subtitle1!.copyWith(fontSize: 16),
                             maxLength: 30,
+                            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r"^[\p{L}\p{N} ]+$", unicode: true))],
+                            textCapitalization: TextCapitalization.sentences,
                             decoration: const InputDecoration(
                               labelText: "Título da gravação",
                             ),
@@ -313,7 +316,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                   });
                                 },
                                 hint: Text("Categoria", style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 16)),
-                                value: selectedCategory ?? null,
+                                value: selectedCategory,
                                 icon: const Icon(
                                   Icons.arrow_drop_down_outlined,
                                   color: Color(0xFF323232),
@@ -364,6 +367,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                               onPressed: () {
                                 String now = DateFormat.yMMMMd().format(DateTime.now());
                                 String title = _recordingTitle.text.trim().isEmpty ? "Recording_$now" : _recordingTitle.text.trim();
+
+                                if (selectedCategory!.isNotEmpty) {
+                                  title = "$selectedCategory/$title";
+                                }
 
                                 stopRecorder(title);
                                 Navigator.pop(context);
@@ -580,7 +587,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
                       if (snapshot.hasData) {
                         Directory dir = snapshot.data;
-                        List<FileSystemEntity> audiosFiles = dir.listSync(recursive: true, followLinks: false);
+                        List<FileSystemEntity?> audiosFiles = dir.listSync(recursive: true, followLinks: false).map((file) {
+                          if (file.statSync().type == FileSystemEntityType.file) {
+                            return file;
+                          }
+                        }).toList();
+
+                        audiosFiles.removeWhere((element) => element == null);
 
                         if (audiosFiles.isEmpty) {
                           return Center(
@@ -597,11 +610,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           separatorBuilder: (context, index) => const SizedBox(height: 5),
                           itemCount: audiosFiles.length,
                           itemBuilder: (BuildContext context, int index) {
-                            if (audiosFiles[index].statSync().type != FileSystemEntityType.file) {
-                              return Container();
-                            }
-
-                            File audioFile = File(audiosFiles[index].path);
+                            File audioFile = File(audiosFiles[index]!.path);
 
                             DateFormat dayFormat = DateFormat.yMd();
                             DateFormat timeFormat = DateFormat.Hm();
@@ -618,24 +627,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
                             return ListTile(
                               onTap: () => showAudioBottomSheet(),
-                              title: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      fileName,
-                                      style: Theme.of(context).textTheme.headline2,
-                                    ),
-                                  ),
-                                  Text(
-                                    createdAtFormatted,
-                                    style: Theme.of(context).textTheme.subtitle2,
-                                  ),
-                                ],
+                              title: Text(
+                                fileName,
+                                style: Theme.of(context).textTheme.headline2,
                               ),
                               subtitle: Text(
-                                fileSize,
+                                "$fileSize \u2022 $createdAtFormatted",
                                 style: Theme.of(context).textTheme.subtitle2,
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.more_vert),
+                                onPressed: () {},
                               ),
                               leading: CircleAvatar(
                                 radius: 35,
