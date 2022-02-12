@@ -351,7 +351,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                             height: 40,
                             child: ElevatedButton(
                               onPressed: () {
-                                String now = DateFormat.yMMMMd().format(DateTime.now());
+                                String now = DateFormat("h_mm a - EEE, d MMM, yyyy").format(DateTime.now());
                                 String title = _recordingTitle.text.trim().isEmpty ? "Recording_$now" : _recordingTitle.text.trim();
 
                                 if (selectedCategory != null && selectedCategory!.isNotEmpty) {
