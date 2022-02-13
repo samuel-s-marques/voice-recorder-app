@@ -12,6 +12,7 @@ import 'package:flutter_sound/flutter_sound.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:voice_recorder_app/utils/utils.dart';
+import 'package:wakelock/wakelock.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -94,8 +95,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       toFile: "${applicationDirectory.path}/temp.$_fileExtension",
       codec: _codec,
     )
-        .then((_) {
+        .then((_) async {
       _stopWatchTimer.onExecute.add(StopWatchExecute.start);
+      await Wakelock.enable();
       setState(() {});
     });
   }
@@ -110,33 +112,37 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       File audioFile = File('${applicationDirectory.path}/temp.$_fileExtension');
 
       await audioFile.rename('${applicationDirectory.path}/$newTitle.$_fileExtension');
+      await Wakelock.disable();
     });
   }
 
   void pauseRecorder() async {
-    await _mRecorder!.pauseRecorder().then((_) {
+    await _mRecorder!.pauseRecorder().then((_) async {
       setState(() {
         _stopWatchTimer.onExecute.add(StopWatchExecute.stop);
       });
+      await Wakelock.disable();
     });
   }
 
   void resumeRecorder() async {
-    await _mRecorder!.resumeRecorder().then((_) {
+    await _mRecorder!.resumeRecorder().then((_) async {
       setState(() {
         _stopWatchTimer.onExecute.add(StopWatchExecute.start);
       });
+      await Wakelock.enable();
     });
   }
 
   void cancelRecord() async {
     Directory? applicationDirectory = await getDirectory();
 
-    await _mRecorder!.stopRecorder().then((value) {
+    await _mRecorder!.stopRecorder().then((value) async {
       setState(() {
         _stopWatchTimer.onExecute.add(StopWatchExecute.reset);
         _mRecorder!.deleteRecord(fileName: "${applicationDirectory.path}/temp.$_fileExtension");
       });
+      await Wakelock.disable();
     });
   }
 
