@@ -7,3 +7,5 @@ A simple, intuitive and beautiful voice recorder app.
 - [ ] Record in background
 
 ## To-do
+
+- [ ] Add local notifications
