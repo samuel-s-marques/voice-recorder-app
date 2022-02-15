@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:intl/intl.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:logger/logger.dart';
@@ -90,6 +91,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   void record() async {
     Directory? applicationDirectory = await getDirectory();
     player.stop();
+    bool canVibrate = await Vibrate.canVibrate;
 
     _mRecorder!
         .startRecorder(
@@ -99,12 +101,19 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         .then((_) async {
       _stopWatchTimer.onExecute.add(StopWatchExecute.start);
       await Wakelock.enable();
+      if (canVibrate) {
+        Vibrate.feedback(FeedbackType.success);
+      }
       setState(() {});
     });
   }
 
   void stopRecorder(String newTitle) async {
     await _mRecorder!.stopRecorder().then((value) async {
+      bool canVibrate = await Vibrate.canVibrate;
+      if (canVibrate) {
+        Vibrate.feedback(FeedbackType.success);
+      }
       setState(() {
         _stopWatchTimer.onExecute.add(StopWatchExecute.reset);
       });
@@ -119,6 +128,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   void pauseRecorder() async {
     await _mRecorder!.pauseRecorder().then((_) async {
+      bool canVibrate = await Vibrate.canVibrate;
+      if (canVibrate) {
+        Vibrate.feedback(FeedbackType.success);
+      }
       setState(() {
         _stopWatchTimer.onExecute.add(StopWatchExecute.stop);
       });
@@ -128,6 +141,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   void resumeRecorder() async {
     await _mRecorder!.resumeRecorder().then((_) async {
+      bool canVibrate = await Vibrate.canVibrate;
+      if (canVibrate) {
+        Vibrate.feedback(FeedbackType.success);
+      }
       setState(() {
         _stopWatchTimer.onExecute.add(StopWatchExecute.start);
       });
@@ -137,8 +154,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   void cancelRecord() async {
     Directory? applicationDirectory = await getDirectory();
+    bool canVibrate = await Vibrate.canVibrate;
 
     await _mRecorder!.stopRecorder().then((value) async {
+      if (canVibrate) {
+        Vibrate.feedback(FeedbackType.success);
+      }
       setState(() {
         _stopWatchTimer.onExecute.add(StopWatchExecute.reset);
         _mRecorder!.deleteRecord(fileName: "${applicationDirectory.path}/temp.$_fileExtension");
