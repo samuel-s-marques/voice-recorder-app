@@ -1003,10 +1003,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           );
                         }
 
-                        return ListView.separated(
+                        return ListView.builder(
                           shrinkWrap: true,
                           physics: const BouncingScrollPhysics(),
-                          separatorBuilder: (context, index) => const SizedBox(height: 5),
                           itemCount: audiosFiles.length,
                           itemBuilder: (BuildContext context, int index) {
                             File audioFile = File(audiosFiles[index]!.path);
@@ -1024,70 +1023,104 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                               createdAtFormatted = dayFormat.format(createdAt);
                             }
 
-                            return ListTile(
-                              onTap: () => showAudioBottomSheet(),
-                              title: AutoSizeText(
-                                fileName,
-                                maxLines: 1,
-                                style: Theme.of(context).textTheme.headline2,
-                              ),
-                              subtitle: Text(
-                                "$fileSize \u2022 $createdAtFormatted",
-                                style: Theme.of(context).textTheme.subtitle2,
-                              ),
-                              trailing: PopupMenuButton(
-                                onSelected: (value) {
-                                  switch (value) {
-                                    case "Compartilhar":
-                                      Share.shareFiles([audioFile.path], text: fileName);
-                                      break;
-                                    case "Renomear":
-                                      rename(audioFile);
-                                      break;
-                                    case "Categorizar":
-                                      categorize(audioFile);
-                                      break;
-                                    case "Deletar":
-                                      delete(audioFile);
-                                      break;
-                                  }
-                                },
-                                itemBuilder: (BuildContext context) {
-                                  return ["Compartilhar", "Renomear", "Categorizar", "Deletar"].map((String choice) {
-                                    return PopupMenuItem(
-                                      child: Text(choice),
-                                      value: choice,
-                                    );
-                                  }).toList();
-                                },
-                              ),
-                              leading: CircleAvatar(
-                                radius: 35,
-                                backgroundColor: const Color(0xFFEFEFEF),
-                                child: IconButton(
-                                  padding: EdgeInsets.zero,
-                                  onPressed: () async {
-                                    if (player.playing && beingPlayed == index) {
-                                      setState(() {
-                                        beingPlayed = -1;
-                                        player.pause();
-                                      });
-                                    } else {
-                                      await player.setFilePath(audioFile.path);
+                            return FutureBuilder(
+                              future: player.setUrl(audiosFiles[index]!.path),
+                              builder: (BuildContext context, AsyncSnapshot duration) {
+                                if (duration.hasData) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 5.0),
+                                    child: ListTile(
+                                      onTap: () => showAudioBottomSheet(),
+                                      title: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: AutoSizeText(
+                                              fileName,
+                                              maxLines: 1,
+                                              style: Theme.of(context).textTheme.headline2,
+                                            ),
+                                          ),
+                                          Text(
+                                            createdAtFormatted,
+                                            style: Theme.of(context).textTheme.subtitle2,
+                                          )
+                                        ],
+                                      ),
+                                      subtitle: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            durationFormat(duration.data),
+                                            style: Theme.of(context).textTheme.subtitle2,
+                                          ),
+                                          Text(
+                                            fileSize,
+                                            style: Theme.of(context).textTheme.subtitle2,
+                                          )
+                                        ],
+                                      ),
+                                      trailing: PopupMenuButton(
+                                        onSelected: (value) {
+                                          switch (value) {
+                                            case "Compartilhar":
+                                              Share.shareFiles([audioFile.path], text: fileName);
+                                              break;
+                                            case "Renomear":
+                                              rename(audioFile);
+                                              break;
+                                            case "Categorizar":
+                                              categorize(audioFile);
+                                              break;
+                                            case "Deletar":
+                                              delete(audioFile);
+                                              break;
+                                          }
+                                        },
+                                        itemBuilder: (BuildContext context) {
+                                          return ["Compartilhar", "Renomear", "Categorizar", "Deletar"].map((String choice) {
+                                            return PopupMenuItem(
+                                              child: Text(choice),
+                                              value: choice,
+                                            );
+                                          }).toList();
+                                        },
+                                      ),
+                                      leading: CircleAvatar(
+                                        radius: 35,
+                                        backgroundColor: const Color(0xFFEFEFEF),
+                                        child: IconButton(
+                                          padding: EdgeInsets.zero,
+                                          onPressed: () async {
+                                            if (player.playing && beingPlayed == index) {
+                                              setState(() {
+                                                beingPlayed = -1;
+                                                player.pause();
+                                              });
+                                            } else {
+                                              await player.setFilePath(audioFile.path);
 
-                                      setState(() {
-                                        beingPlayed = index;
-                                        player.play();
-                                      });
-                                    }
-                                  },
-                                  icon: Icon(
-                                    beingPlayed == index ? Icons.pause : Icons.play_arrow,
-                                    color: const Color(0xFF323232),
-                                  ),
-                                  iconSize: 30,
-                                ),
-                              ),
+                                              setState(() {
+                                                beingPlayed = index;
+                                                player.play();
+                                              });
+                                            }
+                                          },
+                                          icon: Icon(
+                                            beingPlayed == index ? Icons.pause : Icons.play_arrow,
+                                            color: const Color(0xFF323232),
+                                          ),
+                                          iconSize: 30,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              },
                             );
                           },
                         );
