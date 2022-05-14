@@ -24,7 +24,6 @@ class SettingsPage extends StatelessWidget {
             children: [
               SettingsTile("Linguagem", "Português", () {}),
               SettingsTile("Modo", "Claro", () {}),
-              SettingsTile("Áudio", "", () {}),
               SettingsTile("Arquivos", "", () {}),
               SettingsTile("Lixo", "", () {}),
               SettingsTile("Privacidade", "", () {}),
