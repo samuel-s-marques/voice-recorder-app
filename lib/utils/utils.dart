@@ -6,16 +6,12 @@ import 'package:path_provider/path_provider.dart';
 extension DateHelpers on DateTime {
   bool isToday() {
     final now = DateTime.now();
-    return now.day == day &&
-        now.month == month &&
-        now.year == year;
+    return now.day == day && now.month == month && now.year == year;
   }
 
   bool isYesterday() {
     final yesterday = DateTime.now().subtract(const Duration(days: 1));
-    return yesterday.day == day &&
-        yesterday.month == month &&
-        yesterday.year == year;
+    return yesterday.day == day && yesterday.month == month && yesterday.year == year;
   }
 }
 
@@ -38,10 +34,10 @@ Future<Directory> getDirectory() async {
   }
 }
 
-extension FileExtention on FileSystemEntity{
+extension FileExtention on FileSystemEntity {
   String? get name {
     return path.split("/").last.split(".").first;
   }
 }
 
-durationFormat(Duration duration) => duration.toString().split('.').first.padLeft(8, "0");
+String durationFormat(Duration duration) => duration.toString().split('.').first.padLeft(8, "0");
