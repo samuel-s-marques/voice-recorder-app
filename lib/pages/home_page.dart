@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:intl/intl.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:logger/logger.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:sliding_sheet/sliding_sheet.dart';
@@ -33,13 +33,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   FlutterSoundPlayer? _mPlayer = FlutterSoundPlayer();
   FlutterSoundRecorder? _mRecorder = FlutterSoundRecorder();
+  final audioPlayer = AssetsAudioPlayer();
   final StopWatchTimer _stopWatchTimer = StopWatchTimer();
   late TabController _tabController;
   final Codec _codec = Codec.pcm16WAV;
   final String _fileExtension = "wav";
-  final player = AudioPlayer();
   bool _mRecorderIsInited = false;
-  int beingPlayed = -1;
+  Duration duration = const Duration();
+  List<int> audiosDurations = [];
+  List<int> audiosPlaying = [];
 
   @override
   void initState() {
@@ -58,7 +60,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   @override
   void dispose() async {
     WidgetsBinding.instance?.removeObserver(this);
-    player.dispose();
     _mPlayer!.closePlayer();
     _mPlayer = null;
 
@@ -67,13 +68,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
     _tabController.dispose();
     super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
-      player.stop();
-    }
   }
 
   Future<void> openTheRecorder() async {
@@ -90,8 +84,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   void record() async {
     Directory? applicationDirectory = await getDirectory();
-    player.stop();
     bool canVibrate = await Vibrate.canVibrate;
+    stopAudio();
 
     _mRecorder!
         .startRecorder(
@@ -182,6 +176,23 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     }
 
     return record;
+  }
+
+  void stopAudio() async {
+    await audioPlayer.stop();
+    setState(() {});
+    audiosPlaying.clear();
+  }
+
+  void playAudio(String path, int index) async {
+    await audioPlayer.open(
+      Audio.file(path),
+      headPhoneStrategy: HeadPhoneStrategy.pauseOnUnplug,
+      showNotification: true,
+    );
+    await audioPlayer.play();
+    setState(() {});
+    audiosPlaying.add(index);
   }
 
   @override
@@ -1023,104 +1034,89 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                               createdAtFormatted = dayFormat.format(createdAt);
                             }
 
-                            return FutureBuilder(
-                              future: player.setUrl(audiosFiles[index]!.path),
-                              builder: (BuildContext context, AsyncSnapshot duration) {
-                                if (duration.hasData) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(bottom: 5.0),
-                                    child: ListTile(
-                                      onTap: () => showAudioBottomSheet(),
-                                      title: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Expanded(
-                                            child: AutoSizeText(
-                                              fileName,
-                                              maxLines: 1,
-                                              style: Theme.of(context).textTheme.headline2,
-                                            ),
-                                          ),
-                                          Text(
-                                            createdAtFormatted,
-                                            style: Theme.of(context).textTheme.subtitle2,
-                                          )
-                                        ],
-                                      ),
-                                      subtitle: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            durationFormat(duration.data),
-                                            style: Theme.of(context).textTheme.subtitle2,
-                                          ),
-                                          Text(
-                                            fileSize,
-                                            style: Theme.of(context).textTheme.subtitle2,
-                                          )
-                                        ],
-                                      ),
-                                      trailing: PopupMenuButton(
-                                        onSelected: (value) {
-                                          switch (value) {
-                                            case "Compartilhar":
-                                              Share.shareFiles([audioFile.path], text: fileName);
-                                              break;
-                                            case "Renomear":
-                                              rename(audioFile);
-                                              break;
-                                            case "Categorizar":
-                                              categorize(audioFile);
-                                              break;
-                                            case "Deletar":
-                                              delete(audioFile);
-                                              break;
-                                          }
-                                        },
-                                        itemBuilder: (BuildContext context) {
-                                          return ["Compartilhar", "Renomear", "Categorizar", "Deletar"].map((String choice) {
-                                            return PopupMenuItem(
-                                              child: Text(choice),
-                                              value: choice,
-                                            );
-                                          }).toList();
-                                        },
-                                      ),
-                                      leading: CircleAvatar(
-                                        radius: 35,
-                                        backgroundColor: const Color(0xFFEFEFEF),
-                                        child: IconButton(
-                                          padding: EdgeInsets.zero,
-                                          onPressed: () async {
-                                            if (player.playing && beingPlayed == index) {
-                                              setState(() {
-                                                beingPlayed = -1;
-                                                player.pause();
-                                              });
-                                            } else {
-                                              await player.setFilePath(audioFile.path);
-
-                                              setState(() {
-                                                beingPlayed = index;
-                                                player.play();
-                                              });
-                                            }
-                                          },
-                                          icon: Icon(
-                                            beingPlayed == index ? Icons.pause : Icons.play_arrow,
-                                            color: const Color(0xFF323232),
-                                          ),
-                                          iconSize: 30,
-                                        ),
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 5.0),
+                              child: ListTile(
+                                onTap: () => showAudioBottomSheet(),
+                                title: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: AutoSizeText(
+                                        fileName,
+                                        maxLines: 1,
+                                        style: Theme.of(context).textTheme.headline2,
                                       ),
                                     ),
-                                  );
-                                }
-
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              },
+                                    Text(
+                                      createdAtFormatted,
+                                      style: Theme.of(context).textTheme.subtitle2,
+                                    )
+                                  ],
+                                ),
+                                subtitle: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    if (audiosDurations.contains(index))
+                                      Text(
+                                        durationFormat(duration),
+                                        style: Theme.of(context).textTheme.subtitle2,
+                                      ),
+                                    Text(
+                                      fileSize,
+                                      style: Theme.of(context).textTheme.subtitle2,
+                                    )
+                                  ],
+                                ),
+                                trailing: PopupMenuButton(
+                                  onSelected: (value) {
+                                    switch (value) {
+                                      case "Compartilhar":
+                                        Share.shareFiles([audioFile.path], text: fileName);
+                                        break;
+                                      case "Renomear":
+                                        rename(audioFile);
+                                        break;
+                                      case "Categorizar":
+                                        categorize(audioFile);
+                                        break;
+                                      case "Deletar":
+                                        delete(audioFile);
+                                        break;
+                                    }
+                                  },
+                                  itemBuilder: (BuildContext context) {
+                                    return ["Compartilhar", "Renomear", "Categorizar", "Deletar"].map((String choice) {
+                                      return PopupMenuItem(
+                                        child: Text(choice),
+                                        value: choice,
+                                      );
+                                    }).toList();
+                                  },
+                                ),
+                                leading: CircleAvatar(
+                                  radius: 35,
+                                  backgroundColor: const Color(0xFFEFEFEF),
+                                  child: IconButton(
+                                    padding: EdgeInsets.zero,
+                                    onPressed: () async {
+                                      if (audioPlayer.isPlaying.value && audiosPlaying.contains(index)) {
+                                        stopAudio();
+                                      } else {
+                                        playAudio(audioFile.path, index);
+                                        duration = audioPlayer.current.value!.audio.duration;
+                                        audiosDurations.add(index);
+                                        setState(() {});
+                                      }
+                                    },
+                                    icon: Icon(
+                                      audiosPlaying.contains(index) ? Icons.pause : Icons.play_arrow,
+                                      color: const Color(0xFF323232),
+                                    ),
+                                    iconSize: 30,
+                                  ),
+                                ),
+                              ),
                             );
                           },
                         );
