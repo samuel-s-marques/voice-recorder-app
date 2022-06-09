@@ -20,9 +20,9 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.light,
       home: const HomePage(),
       routes: {
-        "/search": (context) => const SearchPage(),
-        "/settings": (context) => const SettingsPage(),
-        "/categories": (context) => const CategoriesPage(),
+        '/search': (context) => const SearchPage(),
+        '/settings': (context) => const SettingsPage(),
+        '/categories': (context) => const CategoriesPage(),
       },
       theme: ThemeData(
         buttonTheme: const ButtonThemeData(
@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
         popupMenuTheme: PopupMenuThemeData(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           textStyle: GoogleFonts.getFont(
-            "Inter",
+            'Inter',
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: const Color(0xFF23262F),
@@ -66,7 +66,7 @@ class MyApp extends StatelessWidget {
           actionsIconTheme: const IconThemeData(color: Color(0xFF323232)),
           centerTitle: true,
           titleTextStyle: GoogleFonts.getFont(
-            "Inter",
+            'Inter',
             fontSize: 24,
             fontWeight: FontWeight.bold,
             color: const Color(0xFF23262F),
@@ -81,13 +81,13 @@ class MyApp extends StatelessWidget {
             borderSide: const BorderSide(style: BorderStyle.solid, width: 1.0, color: Color(0xFFEFEFEF)),
           ),
           labelStyle: GoogleFonts.getFont(
-            "Inter",
+            'Inter',
             fontWeight: FontWeight.w500,
             fontSize: 16,
             color: const Color(0xFF969AA0),
           ),
           hintStyle: GoogleFonts.getFont(
-            "Inter",
+            'Inter',
             fontWeight: FontWeight.w500,
             fontSize: 16,
             color: const Color(0xFF969AA0),
@@ -95,13 +95,13 @@ class MyApp extends StatelessWidget {
         ),
         tabBarTheme: TabBarTheme(
           labelStyle: GoogleFonts.getFont(
-            "Inter",
+            'Inter',
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: const Color(0xFF23262F),
           ),
           unselectedLabelStyle: GoogleFonts.getFont(
-            "Inter",
+            'Inter',
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: const Color(0xFF23262F),
@@ -114,37 +114,37 @@ class MyApp extends StatelessWidget {
         ),
         textTheme: TextTheme(
           headline1: GoogleFonts.getFont(
-            "Inter",
+            'Inter',
             fontSize: 24,
             fontWeight: FontWeight.bold,
             color: const Color(0xFF23262F),
           ),
           headline2: GoogleFonts.getFont(
-            "Inter",
+            'Inter',
             fontSize: 17,
             fontWeight: FontWeight.w500,
             color: const Color(0xFF23262F),
           ),
           subtitle1: GoogleFonts.getFont(
-            "Inter",
+            'Inter',
             fontSize: 24,
             fontWeight: FontWeight.w300,
             color: const Color(0xFF777777),
           ),
           subtitle2: GoogleFonts.getFont(
-            "Inter",
+            'Inter',
             fontSize: 13,
             fontWeight: FontWeight.w500,
             color: const Color(0xFF777777),
           ),
           bodyText1: GoogleFonts.getFont(
-            "Inter",
+            'Inter',
             fontSize: 20,
             fontWeight: FontWeight.w500,
             color: const Color(0xFF969AA0),
           ),
           bodyText2: GoogleFonts.getFont(
-            "Inter",
+            'Inter',
             fontSize: 20,
             fontWeight: FontWeight.w500,
             color: const Color(0xFF495BFF),
