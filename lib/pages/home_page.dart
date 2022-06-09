@@ -37,7 +37,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   final StopWatchTimer _stopWatchTimer = StopWatchTimer();
   late TabController _tabController;
   final Codec _codec = Codec.pcm16WAV;
-  final String _fileExtension = "wav";
+  final String _fileExtension = 'wav';
   bool _mRecorderIsInited = false;
   Duration duration = const Duration();
   List<int> audiosDurations = [];
@@ -73,7 +73,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   Future<void> openTheRecorder() async {
     var status = await Permission.microphone.request();
     if (status != PermissionStatus.granted) {
-      throw RecordingPermissionException("Permissão do microfone negada");
+      throw RecordingPermissionException('Permissão do microfone negada');
     }
 
     await _mRecorder?.setLogLevel(Level.nothing);
@@ -89,7 +89,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
     _mRecorder!
         .startRecorder(
-      toFile: "${applicationDirectory.path}/temp.$_fileExtension",
+      toFile: '${applicationDirectory.path}/temp.$_fileExtension',
       codec: _codec,
     )
         .then((_) async {
@@ -156,7 +156,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       }
       setState(() {
         _stopWatchTimer.onExecute.add(StopWatchExecute.reset);
-        _mRecorder!.deleteRecord(fileName: "${applicationDirectory.path}/temp.$_fileExtension");
+        _mRecorder!.deleteRecord(fileName: '${applicationDirectory.path}/temp.$_fileExtension');
       });
       await Wakelock.disable();
     });
@@ -214,7 +214,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       Padding(
                         padding: const EdgeInsets.only(bottom: 12.0),
                         child: Text(
-                          "Gravação 1",
+                          'Gravação 1',
                           style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 20),
                         ),
                       ),
@@ -290,7 +290,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           Padding(
                             padding: const EdgeInsets.only(bottom: 12.0),
                             child: Text(
-                              "Salvar gravação",
+                              'Salvar gravação',
                               style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 20),
                             ),
                           ),
@@ -298,10 +298,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                             controller: _recordingTitle,
                             style: Theme.of(context).textTheme.subtitle1!.copyWith(fontSize: 16),
                             maxLength: 30,
-                            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r"^[\p{L}\p{N} ]+$", unicode: true))],
+                            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\p{L}\p{N} ]+$', unicode: true))],
                             textCapitalization: TextCapitalization.sentences,
                             decoration: const InputDecoration(
-                              labelText: "Título da gravação",
+                              labelText: 'Título da gravação',
                             ),
                           ),
                           FutureBuilder(
@@ -317,7 +317,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                   List<String?> list = categoryList.map((category) {
                                     if (category.statSync().type == FileSystemEntityType.directory) {
                                       if (category.name != null) {
-                                        return category.name ?? "Categoria";
+                                        return category.name ?? 'Categoria';
                                       }
                                     }
                                   }).toList();
@@ -339,7 +339,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                     selectedCategory = value.toString();
                                   });
                                 },
-                                hint: Text("Categoria", style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 16)),
+                                hint: Text('Categoria', style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 16)),
                                 value: selectedCategory,
                                 icon: const Icon(
                                   Icons.arrow_drop_down_outlined,
@@ -373,7 +373,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                             child: ElevatedButton(
                               onPressed: () => Navigator.pop(context),
                               child: Text(
-                                "Cancelar",
+                                'Cancelar',
                                 style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 16),
                               ),
                               style: Theme.of(context).elevatedButtonTheme.style!.copyWith(
@@ -389,18 +389,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                             height: 40,
                             child: ElevatedButton(
                               onPressed: () {
-                                String now = DateFormat("h_mm a - EEE, d MMM, yyyy").format(DateTime.now());
-                                String title = _recordingTitle.text.trim().isEmpty ? "Recording_$now" : _recordingTitle.text.trim();
+                                String now = DateFormat('h_mm a - EEE, d MMM, yyyy').format(DateTime.now());
+                                String title = _recordingTitle.text.trim().isEmpty ? 'Recording_$now' : _recordingTitle.text.trim();
 
                                 if (selectedCategory != null && selectedCategory!.isNotEmpty) {
-                                  title = "$selectedCategory/$title";
+                                  title = '$selectedCategory/$title';
                                 }
 
                                 stopRecorder(title);
                                 Navigator.pop(context);
                               },
                               child: Text(
-                                "Salvar",
+                                'Salvar',
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyText1!
@@ -426,13 +426,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
     void handleTap(String value) {
       switch (value) {
-        case "Configurações":
-          Navigator.pushNamed(context, "/settings");
+        case 'Configurações':
+          Navigator.pushNamed(context, '/settings');
           break;
-        case "Lixeira":
+        case 'Lixeira':
           break;
-        case "Categorias":
-          Navigator.pushNamed(context, "/categories");
+        case 'Categorias':
+          Navigator.pushNamed(context, '/categories');
           break;
       }
     }
@@ -471,7 +471,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           Padding(
                             padding: const EdgeInsets.only(bottom: 12.0),
                             child: Text(
-                              "Renomear gravação",
+                              'Renomear gravação',
                               style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 20),
                             ),
                           ),
@@ -479,10 +479,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                             controller: _recordingTitle,
                             style: Theme.of(context).textTheme.subtitle1!.copyWith(fontSize: 16),
                             maxLength: 30,
-                            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r"^[\p{L}\p{N} ]+$", unicode: true))],
+                            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\p{L}\p{N} ]+$', unicode: true))],
                             textCapitalization: TextCapitalization.sentences,
                             decoration: const InputDecoration(
-                              labelText: "Novo título da gravação",
+                              labelText: 'Novo título da gravação',
                             ),
                           ),
                           FutureBuilder(
@@ -498,7 +498,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                   List<String?> list = categoryList.map((category) {
                                     if (category.statSync().type == FileSystemEntityType.directory) {
                                       if (category.name != null) {
-                                        return category.name ?? "Categoria";
+                                        return category.name ?? 'Categoria';
                                       }
                                     }
                                   }).toList();
@@ -520,7 +520,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                     selectedCategory = value.toString();
                                   });
                                 },
-                                hint: Text("Categoria", style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 16)),
+                                hint: Text('Categoria', style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 16)),
                                 value: selectedCategory,
                                 icon: const Icon(
                                   Icons.arrow_drop_down_outlined,
@@ -554,7 +554,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                             child: ElevatedButton(
                               onPressed: () => Navigator.pop(context),
                               child: Text(
-                                "Cancelar",
+                                'Cancelar',
                                 style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 16),
                               ),
                               style: Theme.of(context).elevatedButtonTheme.style!.copyWith(
@@ -571,11 +571,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                             child: ElevatedButton(
                               onPressed: () async {
                                 String now = DateFormat.yMMMMd().format(DateTime.now());
-                                String title = _recordingTitle.text.trim().isEmpty ? "Recording_$now" : _recordingTitle.text.trim();
+                                String title = _recordingTitle.text.trim().isEmpty ? 'Recording_$now' : _recordingTitle.text.trim();
                                 int lastSeparator = path.lastIndexOf(Platform.pathSeparator);
 
                                 if (selectedCategory != null && selectedCategory!.isNotEmpty) {
-                                  title = "$selectedCategory/$title";
+                                  title = '$selectedCategory/$title';
                                 }
 
                                 String newPath = path.substring(0, lastSeparator + 1) + title + _fileExtension;
@@ -584,7 +584,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                 Navigator.pop(context);
                               },
                               child: Text(
-                                "Salvar",
+                                'Salvar',
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyText1!
@@ -635,7 +635,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           Padding(
                             padding: const EdgeInsets.only(bottom: 12.0),
                             child: Text(
-                              "Renomear gravação",
+                              'Renomear gravação',
                               style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 20),
                             ),
                           ),
@@ -643,10 +643,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                             controller: _recordingTitle,
                             style: Theme.of(context).textTheme.subtitle1!.copyWith(fontSize: 16),
                             maxLength: 30,
-                            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r"^[\p{L}\p{N} ]+$", unicode: true))],
+                            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\p{L}\p{N} ]+$', unicode: true))],
                             textCapitalization: TextCapitalization.sentences,
                             decoration: const InputDecoration(
-                              labelText: "Novo título da gravação",
+                              labelText: 'Novo título da gravação',
                             ),
                           ),
                           FutureBuilder(
@@ -662,7 +662,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                   List<String?> list = categoryList.map((category) {
                                     if (category.statSync().type == FileSystemEntityType.directory) {
                                       if (category.name != null) {
-                                        return category.name ?? "Categoria";
+                                        return category.name ?? 'Categoria';
                                       }
                                     }
                                   }).toList();
@@ -684,7 +684,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                     selectedCategory = value.toString();
                                   });
                                 },
-                                hint: Text("Categoria", style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 16)),
+                                hint: Text('Categoria', style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 16)),
                                 value: selectedCategory,
                                 icon: const Icon(
                                   Icons.arrow_drop_down_outlined,
@@ -718,7 +718,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                             child: ElevatedButton(
                               onPressed: () => Navigator.pop(context),
                               child: Text(
-                                "Cancelar",
+                                'Cancelar',
                                 style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 16),
                               ),
                               style: Theme.of(context).elevatedButtonTheme.style!.copyWith(
@@ -735,11 +735,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                             child: ElevatedButton(
                               onPressed: () async {
                                 String now = DateFormat.yMMMMd().format(DateTime.now());
-                                String title = _recordingTitle.text.trim().isEmpty ? "Recording_$now" : _recordingTitle.text.trim();
+                                String title = _recordingTitle.text.trim().isEmpty ? 'Recording_$now' : _recordingTitle.text.trim();
                                 int lastSeparator = path.lastIndexOf(Platform.pathSeparator);
 
                                 if (selectedCategory != null && selectedCategory!.isNotEmpty) {
-                                  title = "$selectedCategory/$title";
+                                  title = '$selectedCategory/$title';
                                 }
 
                                 String newPath = path.substring(0, lastSeparator + 1) + title + _fileExtension;
@@ -748,7 +748,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                 Navigator.pop(context);
                               },
                               child: Text(
-                                "Salvar",
+                                'Salvar',
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyText1!
@@ -782,7 +782,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15),
             ),
-            title: const Text("Tem certeza que quer deletar este áudio?"),
+            title: const Text('Tem certeza que quer deletar este áudio?'),
             actions: [
               Padding(
                 padding: const EdgeInsets.only(right: 10.0),
@@ -791,7 +791,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(context),
                     child: Text(
-                      "Cancelar",
+                      'Cancelar',
                       style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 16),
                     ),
                     style: Theme.of(context)
@@ -812,7 +812,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       Navigator.pop(context);
                     },
                     child: Text(
-                      "Salvar",
+                      'Salvar',
                       style: Theme.of(context)
                           .textTheme
                           .bodyText1!
@@ -834,7 +834,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 90,
-        title: const Text("Gravador de Voz"),
+        title: const Text('Gravador de Voz'),
         actions: [
           PopupMenuButton(
             onSelected: handleTap,
@@ -849,7 +849,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           ),
         ],
         bottom: TabBar(
-          tabs: const [Tab(text: "Gravar"), Tab(text: "Ouvir")],
+          tabs: const [Tab(text: 'Gravar'), Tab(text: 'Ouvir')],
           controller: _tabController,
         ),
       ),
@@ -874,7 +874,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               Padding(
                 padding: const EdgeInsets.only(bottom: 40.0),
                 child: Text(
-                  "Alta qualidade",
+                  'Alta qualidade',
                   style: Theme.of(context).textTheme.subtitle1,
                 ),
               ),
@@ -942,10 +942,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   Padding(
                     padding: const EdgeInsets.only(bottom: 20.0),
                     child: TextField(
-                      onTap: () => Navigator.pushNamed(context, "/search"),
+                      onTap: () => Navigator.pushNamed(context, '/search'),
                       readOnly: true,
                       decoration: const InputDecoration(
-                        hintText: "Pesquisar",
+                        hintText: 'Pesquisar',
                         suffixIcon: Icon(
                           Icons.search,
                           color: Color(0xFF777777),
@@ -964,7 +964,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           );
                         }).toList(),
                         onChanged: (_) {},
-                        hint: Text("Categoria", style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 16)),
+                        hint: Text('Categoria', style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 16)),
                         icon: const Icon(
                           Icons.arrow_drop_down_outlined,
                           color: Color(0xFF323232),
@@ -974,14 +974,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                         borderRadius: BorderRadius.circular(10),
                       ),
                       DropdownButton(
-                        items: ["Data", "A-Z", "Z-A", "Tamanho"].map((value) {
+                        items: ['Data', 'A-Z', 'Z-A', 'Tamanho'].map((value) {
                           return DropdownMenuItem(
                             child: Text(value, style: Theme.of(context).popupMenuTheme.textStyle),
                             value: value,
                           );
                         }).toList(),
                         onChanged: (_) {},
-                        hint: Text("Ordenar", style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 16)),
+                        hint: Text('Ordenar', style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 16)),
                         icon: const Icon(
                           Icons.arrow_drop_down_outlined,
                           color: Color(0xFF323232),
@@ -1008,7 +1008,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                         if (audiosFiles.isEmpty) {
                           return Center(
                             child: Text(
-                              "Nada encontrado",
+                              'Nada encontrado',
                               style: Theme.of(context).textTheme.bodyText1,
                             ),
                           );
@@ -1025,8 +1025,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                             DateFormat timeFormat = DateFormat.Hm();
                             String fileSize = getFileSize(audioFile.lengthSync(), 1);
                             DateTime createdAt = audioFile.lastModifiedSync();
-                            String createdAtFormatted = "";
-                            String fileName = audioFile.name ?? "Gravação";
+                            String createdAtFormatted = '';
+                            String fileName = audioFile.name ?? 'Gravação';
 
                             if (createdAt.isToday()) {
                               createdAtFormatted = timeFormat.format(createdAt);
@@ -1071,22 +1071,22 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                 trailing: PopupMenuButton(
                                   onSelected: (value) {
                                     switch (value) {
-                                      case "Compartilhar":
+                                      case 'Compartilhar':
                                         Share.shareFiles([audioFile.path], text: fileName);
                                         break;
-                                      case "Renomear":
+                                      case 'Renomear':
                                         rename(audioFile);
                                         break;
-                                      case "Categorizar":
+                                      case 'Categorizar':
                                         categorize(audioFile);
                                         break;
-                                      case "Deletar":
+                                      case 'Deletar':
                                         delete(audioFile);
                                         break;
                                     }
                                   },
                                   itemBuilder: (BuildContext context) {
-                                    return ["Compartilhar", "Renomear", "Categorizar", "Deletar"].map((String choice) {
+                                    return ['Compartilhar', 'Renomear', 'Categorizar', 'Deletar'].map((String choice) {
                                       return PopupMenuItem(
                                         child: Text(choice),
                                         value: choice,
