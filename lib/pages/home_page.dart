@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -31,28 +30,24 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     Tab(text: 'Lista'),
   ];
 
-  FlutterSoundPlayer? _mPlayer = FlutterSoundPlayer();
+  FlutterSoundPlayer? audioPlayer = FlutterSoundPlayer();
   FlutterSoundRecorder? _mRecorder = FlutterSoundRecorder();
-  final audioPlayer = AssetsAudioPlayer();
   final StopWatchTimer _stopWatchTimer = StopWatchTimer();
   late TabController _tabController;
   final Codec _codec = Codec.pcm16WAV;
   final String _fileExtension = 'wav';
-  bool _mRecorderIsInited = false;
   Duration duration = const Duration();
-  List<int> audiosDurations = [];
   List<int> audiosPlaying = [];
+
+  bool isPlaying(int index) => audiosPlaying.contains(index);
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: tabs.length, vsync: this);
 
-    openTheRecorder().then((value) {
-      setState(() {
-        _mRecorderIsInited = true;
-      });
-    });
+    openTheRecorder();
+    audioPlayer!.openPlayer();
 
     WidgetsBinding.instance?.addObserver(this);
   }
@@ -60,8 +55,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   @override
   void dispose() async {
     WidgetsBinding.instance?.removeObserver(this);
-    _mPlayer!.closePlayer();
-    _mPlayer = null;
+    audioPlayer!.closePlayer();
+    audioPlayer = null;
 
     _mRecorder!.closeRecorder();
     _mRecorder = null;
@@ -78,8 +73,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
     await _mRecorder?.setLogLevel(Level.nothing);
     await _mRecorder!.openRecorder();
-
-    _mRecorderIsInited = true;
   }
 
   void record() async {
@@ -163,7 +156,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   Fn? getRecorderFn() {
-    if (!_mRecorderIsInited || !_mPlayer!.isStopped) {
+    if (!audioPlayer!.isStopped) {
       return null;
     }
 
@@ -179,93 +172,30 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   void stopAudio() async {
-    await audioPlayer.stop();
-    setState(() {});
+    await audioPlayer!.stopPlayer();
+    audiosPlaying.clear();
+  }
+
+  void pauseAudio() async {
+    await audioPlayer!.pausePlayer();
     audiosPlaying.clear();
   }
 
   void playAudio(String path, int index) async {
-    await audioPlayer.open(
-      Audio.file(path),
-      headPhoneStrategy: HeadPhoneStrategy.pauseOnUnplug,
-      showNotification: true,
-    );
-    await audioPlayer.play();
-    setState(() {});
-    audiosPlaying.add(index);
+    duration = (await audioPlayer!.startPlayer(
+        fromURI: path,
+        whenFinished: () {
+          setState(() {
+            audiosPlaying.clear();
+          });
+        }))!;
+    setState(() {
+      audiosPlaying.add(index);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    void showAudioBottomSheet() async {
-      await showSlidingBottomSheet(
-        context,
-        builder: (BuildContext context) {
-          return SlidingSheetDialog(
-            elevation: 8,
-            cornerRadius: 15,
-            builder: (context, state) {
-              return Material(
-                child: Container(
-                  padding: const EdgeInsets.only(left: 24, right: 24, top: 15, bottom: 24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12.0),
-                        child: Text(
-                          'Gravação 1',
-                          style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: 20),
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          IconButton(
-                            onPressed: () {},
-                            icon: const Icon(
-                              Icons.skip_previous,
-                              size: 24,
-                              color: Color(0xFF323232),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                            child: SizedBox(
-                              width: 56,
-                              height: 56,
-                              child: ElevatedButton(
-                                onPressed: () {},
-                                child: Icon(_mPlayer!.isPlaying ? Icons.pause : Icons.play_arrow),
-                                style: ButtonStyle(
-                                  backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFFFF5656)),
-                                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(50),
-                                  )),
-                                ),
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: () {},
-                            icon: const Icon(
-                              Icons.skip_next,
-                              size: 24,
-                              color: Color(0xFF323232),
-                            ),
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      );
-    }
-
     void saveAudioBottomSheet() async {
       TextEditingController _recordingTitle = TextEditingController();
       String? selectedCategory;
@@ -376,8 +306,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                 'Cancelar',
                                 style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 16),
                               ),
-                              style: Theme.of(context).elevatedButtonTheme.style!.copyWith(
-                                  backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.secondary)),
+                              style: Theme.of(context).elevatedButtonTheme.style!.copyWith(backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.secondary)),
                             ),
                           ),
                         ),
@@ -401,15 +330,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                               },
                               child: Text(
                                 'Salvar',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyText1!
-                                    .copyWith(fontSize: 16, color: Theme.of(context).buttonTheme.colorScheme?.secondary),
+                                style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 16, color: Theme.of(context).buttonTheme.colorScheme?.secondary),
                               ),
-                              style: Theme.of(context)
-                                  .elevatedButtonTheme
-                                  .style!
-                                  .copyWith(backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.primary)),
+                              style: Theme.of(context).elevatedButtonTheme.style!.copyWith(backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.primary)),
                             ),
                           ),
                         ),
@@ -557,8 +480,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                 'Cancelar',
                                 style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 16),
                               ),
-                              style: Theme.of(context).elevatedButtonTheme.style!.copyWith(
-                                  backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.secondary)),
+                              style: Theme.of(context).elevatedButtonTheme.style!.copyWith(backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.secondary)),
                             ),
                           ),
                         ),
@@ -585,15 +507,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                               },
                               child: Text(
                                 'Salvar',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyText1!
-                                    .copyWith(fontSize: 16, color: Theme.of(context).buttonTheme.colorScheme?.secondary),
+                                style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 16, color: Theme.of(context).buttonTheme.colorScheme?.secondary),
                               ),
-                              style: Theme.of(context)
-                                  .elevatedButtonTheme
-                                  .style!
-                                  .copyWith(backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.primary)),
+                              style: Theme.of(context).elevatedButtonTheme.style!.copyWith(backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.primary)),
                             ),
                           ),
                         ),
@@ -721,8 +637,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                 'Cancelar',
                                 style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 16),
                               ),
-                              style: Theme.of(context).elevatedButtonTheme.style!.copyWith(
-                                  backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.secondary)),
+                              style: Theme.of(context).elevatedButtonTheme.style!.copyWith(backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.secondary)),
                             ),
                           ),
                         ),
@@ -749,15 +664,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                               },
                               child: Text(
                                 'Salvar',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyText1!
-                                    .copyWith(fontSize: 16, color: Theme.of(context).buttonTheme.colorScheme?.secondary),
+                                style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 16, color: Theme.of(context).buttonTheme.colorScheme?.secondary),
                               ),
-                              style: Theme.of(context)
-                                  .elevatedButtonTheme
-                                  .style!
-                                  .copyWith(backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.primary)),
+                              style: Theme.of(context).elevatedButtonTheme.style!.copyWith(backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.primary)),
                             ),
                           ),
                         ),
@@ -794,10 +703,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       'Cancelar',
                       style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 16),
                     ),
-                    style: Theme.of(context)
-                        .elevatedButtonTheme
-                        .style!
-                        .copyWith(backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.secondary)),
+                    style: Theme.of(context).elevatedButtonTheme.style!.copyWith(backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.secondary)),
                   ),
                 ),
               ),
@@ -813,15 +719,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     },
                     child: Text(
                       'Salvar',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyText1!
-                          .copyWith(fontSize: 16, color: Theme.of(context).buttonTheme.colorScheme?.secondary),
+                      style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 16, color: Theme.of(context).buttonTheme.colorScheme?.secondary),
                     ),
-                    style: Theme.of(context)
-                        .elevatedButtonTheme
-                        .style!
-                        .copyWith(backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.primary)),
+                    style: Theme.of(context).elevatedButtonTheme.style!.copyWith(backgroundColor: MaterialStateProperty.all(Theme.of(context).buttonTheme.colorScheme?.primary)),
                   ),
                 ),
               ),
@@ -905,12 +805,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                         onPressed: getRecorderFn(),
                         child: _mRecorder!.isRecording ? const Icon(Icons.pause) : null,
                         style: ButtonStyle(
-                          backgroundColor:
-                              MaterialStateProperty.all<Color>(_mRecorder!.isRecording ? const Color(0xFFFF5656) : Colors.white),
-                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(50),
-                            side: const BorderSide(color: Color(0xFFFF5656), width: 8),
-                          )),
+                          backgroundColor: MaterialStateProperty.all<Color>(_mRecorder!.isRecording ? const Color(0xFFFF5656) : Colors.white),
+                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(50),
+                              side: const BorderSide(color: Color(0xFFFF5656), width: 8),
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -1037,7 +938,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 5.0),
                               child: ListTile(
-                                onTap: () => showAudioBottomSheet(),
+                                onTap: () {},
                                 title: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
@@ -1057,7 +958,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                 subtitle: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    if (audiosDurations.contains(index))
+                                    if (isPlaying(index))
                                       Text(
                                         durationFormat(duration),
                                         style: Theme.of(context).textTheme.subtitle2,
@@ -1100,17 +1001,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                   child: IconButton(
                                     padding: EdgeInsets.zero,
                                     onPressed: () async {
-                                      if (audioPlayer.isPlaying.value && audiosPlaying.contains(index)) {
-                                        stopAudio();
+                                      if ((audioPlayer!.isPlaying)) {
+                                        pauseAudio();
+                                        setState(() {});
                                       } else {
                                         playAudio(audioFile.path, index);
-                                        duration = audioPlayer.current.value!.audio.duration;
-                                        audiosDurations.add(index);
-                                        setState(() {});
                                       }
                                     },
                                     icon: Icon(
-                                      audiosPlaying.contains(index) ? Icons.pause : Icons.play_arrow,
+                                      isPlaying(index) ? Icons.pause : Icons.play_arrow,
                                       color: const Color(0xFF323232),
                                     ),
                                     iconSize: 30,
