@@ -183,12 +183,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   void playAudio(String path, int index) async {
     duration = (await audioPlayer!.startPlayer(
-        fromURI: path,
-        whenFinished: () {
-          setState(() {
-            audiosPlaying.clear();
-          });
-        }))!;
+      fromURI: path,
+      whenFinished: () {
+        setState(() {
+          audiosPlaying.clear();
+        });
+      },
+    ))!;
     setState(() {
       audiosPlaying.add(index);
     });
