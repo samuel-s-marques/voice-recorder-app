@@ -13,6 +13,7 @@ import 'package:flutter_sound/flutter_sound.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:voice_recorder_app/utils/utils.dart';
+import 'package:voice_recorder_app/widgets/mini_player.dart';
 import 'package:wakelock/wakelock.dart';
 
 class HomePage extends StatefulWidget {
@@ -1033,6 +1034,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           ),
         ],
       ),
+      bottomNavigationBar: audioPlayer!.isPlaying ? MiniPlayer() : null,
     );
   }
 }
