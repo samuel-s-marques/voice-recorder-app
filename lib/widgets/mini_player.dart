@@ -30,24 +30,25 @@ class MiniPlayer extends StatelessWidget {
             ),
           ),
           ListTile(
-              title: const Text('Title'),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.skip_previous),
-                  ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.pause),
-                  ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.skip_next),
-                  ),
-                ],
-              )),
+            title: const Text('Title'),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.skip_previous),
+                ),
+                IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.pause),
+                ),
+                IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.skip_next),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
